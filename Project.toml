@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Bijectors = "0.8"
