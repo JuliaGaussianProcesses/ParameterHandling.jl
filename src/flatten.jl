@@ -1,7 +1,7 @@
 function flatten(x::Real)
-	v = [x]
-	unflatten_to_Real(v::Vector{<:Real}) = only(v)
-	return v, unflatten_to_Real
+    v = [x]
+    unflatten_to_Real(v::Vector{<:Real}) = only(v)
+    return v, unflatten_to_Real
 end
 
 flatten(x::Vector{<:Real}) = (x, identity)

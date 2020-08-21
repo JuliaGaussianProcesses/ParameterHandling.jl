@@ -15,12 +15,12 @@ end
 
 function test_parameter_interface(x::AbstractParameter)
 
-	# Parameters need to be flatten-able.
-	test_flatten_interface(x)
+    # Parameters need to be flatten-able.
+    test_flatten_interface(x)
 
-	# Run this to make sure that it doesn't error.
-	value(x)
-	return nothing
+    # Run this to make sure that it doesn't error.
+    value(x)
+    return nothing
 end
 
 end # module
