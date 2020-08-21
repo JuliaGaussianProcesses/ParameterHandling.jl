@@ -1,5 +1,7 @@
 abstract type AbstractParameter{T} end
 
+value(x) = x
+
 """
 	Positive{T<:Real, V}
 

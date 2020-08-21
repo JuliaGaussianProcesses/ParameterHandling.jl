@@ -1,0 +1,4 @@
+[deps]
+Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
