@@ -1,5 +1,6 @@
 module ParameterHandling
 
-greet() = print("Hello World!")
+include("flatten.jl")
+include("parameters.jl")
 
 end # module
