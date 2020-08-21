@@ -3,7 +3,11 @@ uuid = "2412ca09-6db7-441c-8e3a-88d5709968c5"
 authors = ["Invenia Technical Computing Corporation"]
 version = "0.1.0"
 
+[deps]
+Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
+
 [compat]
+Bijectors = "0.8"
 julia = "1"
 
 [extras]
