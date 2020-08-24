@@ -1,5 +1,15 @@
 abstract type AbstractParameter{T} end
 
+"""
+    value(x)
+
+Return the "value" of an object.
+For anything that is _not_ an `AbstractParameter` this is the identity function.
+For `AbstractParameter`s this typically applies some transformation to some data
+contained in the parameter, and returns a plain data type.
+It might, for example, return a transformation of some internal data, the result of which
+is guaranteed to satisfy some contraint.
+"""
 value(x) = x
 
 """
