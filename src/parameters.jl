@@ -15,7 +15,9 @@ value(x) = x
 """
     Positive{T<:Real, V}
 
-
+The `value` of a `Positive` is a `Real` number that is constrained to be positive. This is
+represented in terms of an `unconstrained_value` and a `transform` that maps any value
+the `unconstrained_value` might take to the positive reals.
 """
 struct Positive{T<:Real, V<:Bijector} <: AbstractParameter{T}
     unconstrained_value::T
@@ -39,7 +41,9 @@ end
 """
     Fixed{T}    
 
-
+Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
+simply its value -- that constantness of the parameter is enforced by returning an empty
+vector from `flatten`.
 """
 struct Fixed{T} <: AbstractParameter{T}
     value::T
@@ -48,9 +52,8 @@ end
 value(x::Fixed) = x.value
 
 function flatten(x::Fixed)
-    v, unflatten = flatten(x.value)
 
     unflatten_to_Fixed(v_new::Vector{<:Real}) = x
 
-    return v, unflatten_to_Fixed
+    return Float64[], unflatten_to_Fixed
 end
