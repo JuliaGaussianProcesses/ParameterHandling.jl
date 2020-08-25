@@ -14,6 +14,7 @@ value(x)
 # Various basic `value` definitions.
 value(x::Number) = x
 value(x::AbstractArray{<:Number}) = x
+value(x::AbstractArray) = map(value, x)
 value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
