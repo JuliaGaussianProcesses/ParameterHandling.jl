@@ -129,3 +129,10 @@ For this we introduce a collection of new `AbstractParameter` types (whether we 
 them to have some mutual supertype is unclear at present) that play nicely with `flatten`
 and allow one to specify that e.g. a particular scalar must remain positive, or should be
 fixed across iterations. See `src/parameters.jl` and `test/parameters.jl` for more examples.
+
+The approach to implementing these types typically revolves around some kind of deferred /
+delayed computation. For example, a `Positive` parameter is represented by an
+"unconstrained" number, and a "transform" that maps from the entire real line to the
+positive half. The `value` of a `Positive` is given by the application of this transform to
+the unconstrained number. `flatten`ing a `Positive` yields a length-1 vector containing the
+_unconstrained_ number, rather than the value represented by the `Positive` object.
