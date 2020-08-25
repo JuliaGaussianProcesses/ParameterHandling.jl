@@ -1,5 +1,6 @@
 using Bijectors
 using Compat: only
+using Distributions
 using Optim
 using ParameterHandling
 using Test
