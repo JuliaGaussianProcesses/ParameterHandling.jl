@@ -1,4 +1,5 @@
 using Bijectors
+using Compat: only
 using Optim
 using ParameterHandling
 using Test

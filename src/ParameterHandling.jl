@@ -1,6 +1,7 @@
 module ParameterHandling
 
 using Bijectors
+using Compat: only
 
 export flatten, Positive, Fixed
 
