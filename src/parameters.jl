@@ -65,7 +65,11 @@ function flatten(x::Fixed)
 end
 
 """
+    Deferred(f, args...)
 
+The `value` of a `Deferred` is `f(value(args)...)`. This makes it possible to make the value
+of the `args` e.g. `AbstractParameter`s and, therefore, enforce constraints on them even if
+`f` knows nothing about `AbstractParameters`.
 """
 struct Deferred{Tf, Targs} <: AbstractParameter
     f::Tf
