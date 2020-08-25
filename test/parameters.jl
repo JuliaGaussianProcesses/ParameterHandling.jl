@@ -76,6 +76,6 @@
         )
 
         # Check that it's successfully optimised.
-        @test mean(value(unflatten(results.minimizer))) ≈ 0 atol=1e-9
+        @test mean(value(unflatten(results.minimizer))) ≈ 0 atol=1e-7
     end
 end
