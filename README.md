@@ -37,15 +37,16 @@ learned_θ = learn(build_model, initial_θ)
 ```
 
 So far so good, but now consider how one actually goes about writing `build_model`.
-There are a considerations that must be made:
+There are more or less two things that must be written:
 
 1. `θ` must be in a format that `learn` knows how to handle. A popular approach is to
     require that `θ` be a `Vector` of `Real` numbers -- or, rather, some concrete subtype of
     `Real`. 
-1. The code required to turn `θ` into `model` inside `build_model` mustn't be too onerous.
+1. The code required to turn `θ` into `model` inside `build_model` mustn't be too onerous to
+	write, read, or modify.
 
-While the first point pretty straightforward, the second point is a bit subtle, so it's
-worth working through a couple of examples to understand what it's getting at.
+While the first point is fairly straightforward, the second point is a bit subtle, so it's
+worth dwelling on it a little.
 
 For the sake of concreteness, let's suppose that we adopt the convention that `θ` is a
 `Vector{Float64}`. In the case of linear regression, we might assume that `θ` comprises
@@ -69,7 +70,7 @@ This version of the function is much easier to read -- moreover if you want to i
 values of `w` and `b` at some other point in time, you don't need to know precisely how to
 chop up the vector.
 
-Moreover it seems quite probably that the latter approach is less
+Moreover it seems probable that the latter approach is less
 bug-prone -- suppose for some reason one refactored the code so that the first element of
 `θ` became `b` and the last `D` elements `w`; any code that depended upon the original
 ordering will now be incorrect and likely fail silently. The `NamedTuple` approach simply
@@ -79,7 +80,7 @@ Granted, in this simple case it's not too much of a problem, but it's easy to fi
 situations in which things become considerably more difficult. For example, suppose that we
 instead had pretty much any kind of neural network, Gaussian process, ODE, or really just
 any model with more than a couple of distinct parameters. From the perspective of
-implementing writing complicated models, implementing things in terms of a single vector of
+writing complicated models, implementing things in terms of a single vector of
 parameters that is _manually_ chopped up is an _extremely_ bad design choice. It simply
 doesn't scale.
 
@@ -93,3 +94,38 @@ purpose optimisers / approximate inference routines --
 
 
 # The ParameterHandling.jl Approach
+
+`ParameterHandling.jl` aims to give you the best of both worlds by providing the tools
+required to automate the transformation between a "structured" representation (e.g. nested
+`NamedTuple` / `Dict` etc) and a "flattened" (e.g. `Vector{Float64}`) of your model
+parameters.
+
+The function `flatten` eats a structured representation of some parameters, returning the
+flattened representation _and_ a function that converts the flattened thing back into its
+structured representation.
+
+`flatten` is implemented recursively, with a _very_ small number of base-implementations
+that don't themselves call `flatten`.
+
+You should expect to occassionally have to extend `flatten` to handle your own types and, if
+you wind up doing this for a function in `Base` that this package doesn't yet cover, a PR
+including that implementation will be very welcome.
+
+See `test/parameters.jl` for a couple of examples that utilise `flatten` to do something
+similar to the task described above.
+
+
+
+
+
+# Dealing with Constrained Parameters
+
+It is very common to need to handle constraints on parameters e.g. it may be necessary for a
+particular scalar to always be positive. While `flatten` is great for changing between
+representations of your parameters, it doesn't really have anything to say about this
+constraint problem.
+
+For this we introduce a collection of new `AbstractParameter` types (whether we really need
+them to have some mutual supertype is unclear at present) that play nicely with `flatten`
+and allow one to specify that e.g. a particular scalar must remain positive, or should be
+fixed across iterations. See `src/parameters.jl` and `test/parameters.jl` for more examples.
