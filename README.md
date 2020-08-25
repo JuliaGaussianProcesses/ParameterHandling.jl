@@ -9,6 +9,10 @@
 
 ParameterHandling.jl is an experiment in handling constrained tunable parameters of models.
 
+
+
+
+
 # The Parameter Handling Problem
 
 Consider the following common situation: you have a function `build_model` that maps a
@@ -76,5 +80,16 @@ situations in which things become considerably more difficult. For example, supp
 instead had pretty much any kind of neural network, Gaussian process, ODE, or really just
 any model with more than a couple of distinct parameters. From the perspective of
 implementing writing complicated models, implementing things in terms of a single vector of
-parameters that is manually chopped up is an _extremely_ bad design choice. It simply
+parameters that is _manually_ chopped up is an _extremely_ bad design choice. It simply
 doesn't scale.
+
+However, a single vector of e.g. `Float64`s _is_ extremely convenient when writing general
+purpose optimisers / approximate inference routines --
+[Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl) and
+[AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl) being two obvious examples.
+
+
+
+
+
+# The ParameterHandling.jl Approach
