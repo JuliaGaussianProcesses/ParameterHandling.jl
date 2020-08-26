@@ -82,6 +82,8 @@ struct Deferred{Tf, Targs} <: AbstractParameter
     end
 end
 
+Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
+
 value(x::Deferred) = x.f(map(value, x.args)...)
 
 function flatten(x::Deferred)

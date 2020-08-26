@@ -13,7 +13,7 @@ function test_flatten_interface(x::T) where {T}
     return nothing
 end
 
-function test_parameter_interface(x::AbstractParameter)
+function test_parameter_interface(x)
 
     # Parameters need to be flatten-able.
     test_flatten_interface(x)

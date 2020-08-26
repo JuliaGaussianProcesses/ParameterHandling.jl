@@ -3,6 +3,7 @@ using Compat: only
 using Distributions
 using Optim
 using ParameterHandling
+using PDMats
 using Test
 using Zygote
 
