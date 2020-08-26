@@ -135,4 +135,35 @@ delayed computation. For example, a `Positive` parameter is represented by an
 "unconstrained" number, and a "transform" that maps from the entire real line to the
 positive half. The `value` of a `Positive` is given by the application of this transform to
 the unconstrained number. `flatten`ing a `Positive` yields a length-1 vector containing the
-_unconstrained_ number, rather than the value represented by the `Positive` object.
+_unconstrained_ number, rather than the value represented by the `Positive` object. For
+example
+
+```julia
+julia> using ParameterHandling: value, Positive
+
+julia> x_unconstrained = log(1.0) # Specify unconstrained value.
+0.0
+
+julia> x = Positive(x_unconstrained) # Construct a number that should remain positive.
+Positive{Float64,Bijectors.Exp{0}}(0.0, Bijectors.Exp{0}())
+
+julia> value(x) # Get the constrained value by applying the transform.
+1.0
+
+julia> v, unflatten = flatten(x); # Supports the `flatten` interface.
+
+julia> v
+1-element Array{Float64,1}:
+ 0.0
+
+julia> new_v = randn(1) # Pick a random new value.
+1-element Array{Float64,1}:
+ 1.1220600582508566
+
+julia> value(unflatten(new_v)) # Obtain constrained value.
+3.071174489325673
+```
+
+It is straightforward to implement your own parameters that interoperate with those already
+written by implementing `value` and `flatten` for them. You might want to do this if this
+package doesn't currently support the functionality that you need.
