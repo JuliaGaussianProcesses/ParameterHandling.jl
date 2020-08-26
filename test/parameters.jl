@@ -11,7 +11,7 @@
 
     @testset "Deferred" begin
         test_parameter_interface(Deferred(sin, 0.5))
-        test_parameter_interface(Deferred(sin, Positive(log(0.5), Bijectors.Exp())))
+        test_parameter_interface(Deferred(sin, Positive(log(0.5))))
         test_parameter_interface(
             Deferred(
                 MvNormal,

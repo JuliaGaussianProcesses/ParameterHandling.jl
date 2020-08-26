@@ -19,6 +19,7 @@ value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
+
 """
     Positive{T<:Real, V}
 
@@ -26,20 +27,21 @@ The `value` of a `Positive` is a `Real` number that is constrained to be positiv
 represented in terms of an `unconstrained_value` and a `transform` that maps any value
 the `unconstrained_value` might take to the positive reals.
 """
-struct Positive{T<:Real, V<:Bijector} <: AbstractParameter
+struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     transform::V
+    ε::Tε
 end
 
-Positive(value::Real) = Positive(value, Bijectors.Exp())
+Positive(value::Real) = Positive(value, Bijectors.Exp(), convert(typeof(value), 1e-12))
 
-value(x::Positive) = x.transform(x.unconstrained_value)
+value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 
 function flatten(x::Positive)
     v, unflatten_to_Real = flatten(x.unconstrained_value)
 
     function unflatten_Positive(v_new::Vector{<:Real})
-        return Positive(unflatten_to_Real(v_new), x.transform)
+        return Positive(unflatten_to_Real(v_new), x.transform, x.ε)
     end
 
     return v, unflatten_Positive
@@ -84,7 +86,7 @@ end
 
 Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
 
-value(x::Deferred) = x.f(map(value, x.args)...)
+value(x::Deferred) = x.f(value(x.args)...)
 
 function flatten(x::Deferred)
 
