@@ -3,11 +3,13 @@ uuid = "2412ca09-6db7-441c-8e3a-88d5709968c5"
 authors = ["Invenia Technical Computing Corporation"]
 version = "0.1.0"
 
-[compat]
-julia = "1"
-
-[extras]
+[deps]
+Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[targets]
-test = ["Test"]
+[compat]
+Bijectors = "0.8"
+Compat = "3"
+julia = "1.3"
