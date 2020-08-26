@@ -130,7 +130,7 @@ them to have some mutual supertype is unclear at present) that play nicely with 
 and allow one to specify that e.g. a particular scalar must remain positive, or should be
 fixed across iterations. See `src/parameters.jl` and `test/parameters.jl` for more examples.
 
-The approach to implementing these types typically revolves around some kind of deferred /
+The approach to implementing these types typically revolves around some kind of `Deferred` /
 delayed computation. For example, a `Positive` parameter is represented by an
 "unconstrained" number, and a "transform" that maps from the entire real line to the
 positive half. The `value` of a `Positive` is given by the application of this transform to
