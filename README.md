@@ -167,3 +167,9 @@ julia> value(unflatten(new_v)) # Obtain constrained value.
 It is straightforward to implement your own parameters that interoperate with those already
 written by implementing `value` and `flatten` for them. You might want to do this if this
 package doesn't currently support the functionality that you need.
+
+
+
+# Gotchas
+
+1. `Integer`s typically don't take part in the kind of optimisation procedures that this package is designed to handle. Consequently, `flatten(::Integer)` produces an empty vector.

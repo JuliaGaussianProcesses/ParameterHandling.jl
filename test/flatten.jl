@@ -2,6 +2,11 @@
 
     @testset "Reals" begin
         test_flatten_interface(1.0)
+
+        @testset "Integers" begin
+            test_flatten_interface(1)
+            @test isempty(first(flatten(1)))
+        end
     end
 
     @testset "AbstractArrays" begin
