@@ -172,4 +172,4 @@ package doesn't currently support the functionality that you need.
 
 # Gotchas
 
-1. `flatten(::AbstractFloat)` produces a vector with a single element. However, `flatten(::Integer)` produces an empty vector. This is because `Integer`s typically don't take part in the kind of optimisation procedures that this package is designed to handle.
+1. `Integer`s typically don't take part in the kind of optimisation procedures that this package is designed to handle. Consequently, `flatten(::Integer)` produces an empty vector.
