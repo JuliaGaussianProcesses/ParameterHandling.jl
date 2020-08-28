@@ -17,13 +17,19 @@ true
 """
 function flatten end
 
-function flatten(x::Real)
+function flatten(x::Integer)
+    v = Float64[]
+    unflatten_Integer(v::Vector{Float64}) = x
+    return v, unflatten_Integer
+end
+
+function flatten(x::AbstractFloat)
     v = [x]
     unflatten_to_Real(v::Vector{<:Real}) = only(v)
     return v, unflatten_to_Real
 end
 
-flatten(x::Vector{<:Real}) = (x, identity)
+flatten(x::Vector{<:AbstractFloat}) = (x, identity)
 
 function flatten(x::AbstractVector)
     x_vecs_and_backs = map(flatten, x)
