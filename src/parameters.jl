@@ -21,7 +21,7 @@ value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
 
 """
-    Positive{T<:Real, V}
+    Positive(value::Real)
 
 The `value` of a `Positive` is a `Real` number that is constrained to be positive. This is
 represented in terms of an `unconstrained_value` and a `transform` that maps any value
@@ -48,7 +48,7 @@ function flatten(x::Positive)
 end
 
 """
-    Bounded{T<:Real, V<:Bijector, Tε<:Real}
+    Bounded(value::Real, lower_bound::Real, upper_bound::Real)
 
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
@@ -84,7 +84,7 @@ function flatten(x::Bounded)
 end
 
 """
-    Fixed{T}    
+    Fixed{T}
 
 Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
 simply its value -- that constantness of the parameter is enforced by returning an empty
