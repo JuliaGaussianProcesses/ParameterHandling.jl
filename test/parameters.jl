@@ -2,7 +2,10 @@
 
     @testset "Postive" begin
         test_parameter_interface(Positive(5.0))
-        test_parameter_interface(Positive(5.0))
+    end
+
+    @testset "Bounded" begin
+        test_parameter_interface(Bounded(-1.0, -0.1, 2.0))
     end
 
     @testset "Fixed" begin

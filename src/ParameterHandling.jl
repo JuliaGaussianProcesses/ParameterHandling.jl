@@ -3,7 +3,7 @@ module ParameterHandling
 using Bijectors
 using Compat: only
 
-export flatten, Positive, Fixed, Deferred
+export flatten, Positive, Bounded, Fixed, Deferred
 
 include("flatten.jl")
 include("parameters.jl")

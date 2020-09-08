@@ -48,6 +48,42 @@ function flatten(x::Positive)
 end
 
 """
+    Bounded{T<:Real, V<:Bijector, Tε<:Real}
+
+The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
+(`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
+a `transform` that maps any value to reals included by (`lower_bound`, `upper_bound`).
+"""
+struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
+    unconstrained_value::T
+    lower_bound::T
+    upper_bound::T
+    transform::V
+    ε::Tε
+end
+
+function Bounded(value::Real, lower_bound::Real, upper_bound::Real)
+    lb = convert(typeof(value), lower_bound)
+    ub = convert(typeof(value), upper_bound)
+    ε = convert(typeof(value), 1e-12)
+
+    # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
+    return Bounded(value, lb, ub, inv(Bijectors.Logit(lb + ε, ub - ε)), ε)
+end
+
+value(x::Bounded) = x.transform(x.unconstrained_value)
+
+function flatten(x::Bounded)
+    v, unflatten_to_Real = flatten(x.unconstrained_value)
+
+    function unflatten_Bounded(v_new::Vector{<:Real})
+        return Bounded(unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε)
+    end
+
+    return v, unflatten_Bounded
+end
+
+"""
     Fixed{T}    
 
 Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
