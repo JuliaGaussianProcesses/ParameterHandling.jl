@@ -2,10 +2,22 @@
 
     @testset "Postive" begin
         test_parameter_interface(Positive(5.0))
+        p = Positive(-10.0)
+        @test value(p) > p.ε
+        p = Positive(-Inf)
+        @test value(p) == p.ε
     end
 
     @testset "Bounded" begin
         test_parameter_interface(Bounded(-1.0, -0.1, 2.0))
+        p = Bounded(-10.0, -0.1, 2.0)
+        @test value(p) > p.lower_bound
+        p = Bounded(-Inf, -0.1, 2.0)
+        @test value(p) == p.lower_bound + p.ε
+        p = Bounded(10.0, -0.1, 2.0)
+        @test value(p) < p.upper_bound
+        p = Bounded(Inf, -0.1, 2.0)
+        @test value(p) == p.upper_bound - p.ε
     end
 
     @testset "Fixed" begin
