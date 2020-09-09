@@ -33,7 +33,9 @@ struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     ε::Tε
 end
 
-Positive(value::Real) = Positive(value, Bijectors.Exp(), convert(typeof(value), 1e-12))
+function positive(value::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
+    return Positive(inv(transform)(value - ε), transform, convert(typeof(value), ε))
+end
 
 value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 
@@ -62,13 +64,16 @@ struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     ε::Tε
 end
 
-function Bounded(value::Real, lower_bound::Real, upper_bound::Real)
+function bounded(value::Real, lower_bound::Real, upper_bound::Real)
     lb = convert(typeof(value), lower_bound)
     ub = convert(typeof(value), upper_bound)
     ε = convert(typeof(value), 1e-12)
 
+    inv_transform = Bijectors.Logit(lb + ε, ub - ε)
+    transform = inv(inv_transform)
+
     # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
-    return Bounded(value, lb, ub, inv(Bijectors.Logit(lb + ε, ub - ε)), ε)
+    return Bounded(inv_transform(value), lb, ub, transform, ε)
 end
 
 value(x::Bounded) = x.transform(x.unconstrained_value)
@@ -77,7 +82,9 @@ function flatten(x::Bounded)
     v, unflatten_to_Real = flatten(x.unconstrained_value)
 
     function unflatten_Bounded(v_new::Vector{<:Real})
-        return Bounded(unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε)
+        return Bounded(
+            unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε,
+        )
     end
 
     return v, unflatten_Bounded
@@ -93,6 +100,15 @@ vector from `flatten`.
 struct Fixed{T} <: AbstractParameter
     value::T
 end
+
+"""
+    fixed(value)
+
+Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
+simply its value -- that constantness of the parameter is enforced by returning an empty
+vector from `flatten`.
+"""
+fixed(value) = Fixed(value)
 
 value(x::Fixed) = x.value
 
@@ -115,12 +131,11 @@ It can be helpful to use `Deferred` recursively when constructing complicated ob
 struct Deferred{Tf, Targs} <: AbstractParameter
     f::Tf
     args::Targs
-    function Deferred(f::Tf, args...) where {Tf}
-        return new{Tf, typeof(args)}(f, args)
-    end
 end
 
 Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
+
+deferred(value, args...) = Deferred(value, args)
 
 value(x::Deferred) = x.f(value(x.args)...)
 
@@ -129,7 +144,7 @@ function flatten(x::Deferred)
     v, unflatten = flatten(x.args)
 
     function unflatten_Deferred(v_new::Vector{<:Real})
-        return Deferred(x.f, unflatten(v_new)...)
+        return Deferred(x.f, unflatten(v_new))
     end
 
     return v, unflatten_Deferred
