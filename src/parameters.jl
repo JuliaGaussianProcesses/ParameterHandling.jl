@@ -53,7 +53,7 @@ end
 """
     bounded(value::Real, lower_bound::Real, upper_bound::Real)
 
-Constructs a `bounded`.
+Constructs a `Bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
 a `transform` that maps any value to reals in (`lower_bound`, `upper_bound`).
