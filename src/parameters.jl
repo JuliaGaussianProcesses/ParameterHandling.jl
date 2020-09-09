@@ -19,22 +19,23 @@ value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
-
 """
-    Positive(value::Real)
+    positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
 
-The `value` of a `Positive` is a `Real` number that is constrained to be positive. This is
-represented in terms of an `unconstrained_value` and a `transform` that maps any value
-the `unconstrained_value` might take to the positive reals.
+Returns a `postive`.
+The `value` of a `Positive` is a `Real` number that is constrained to be positive.
+This is represented in terms of an a `transform` that maps an `unconstrained_value` to the
+positive reals.
+Satisfies `val ≈ transform(unconstrained_value)`
 """
+function positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
+    return Positive(inv(transform)(val - ε), transform, convert(typeof(val), ε))
+end
+
 struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     transform::V
     ε::Tε
-end
-
-function positive(value::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
-    return Positive(inv(transform)(value - ε), transform, convert(typeof(value), ε))
 end
 
 value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
@@ -50,20 +51,13 @@ function flatten(x::Positive)
 end
 
 """
-    Bounded(value::Real, lower_bound::Real, upper_bound::Real)
+    bounded(value::Real, lower_bound::Real, upper_bound::Real)
 
+Constructs a `bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
-a `transform` that maps any value to reals included by (`lower_bound`, `upper_bound`).
+a `transform` that maps any value to reals in (`lower_bound`, `upper_bound`).
 """
-struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
-    unconstrained_value::T
-    lower_bound::T
-    upper_bound::T
-    transform::V
-    ε::Tε
-end
-
 function bounded(value::Real, lower_bound::Real, upper_bound::Real)
     lb = convert(typeof(value), lower_bound)
     ub = convert(typeof(value), upper_bound)
@@ -74,6 +68,14 @@ function bounded(value::Real, lower_bound::Real, upper_bound::Real)
 
     # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
     return Bounded(inv_transform(value), lb, ub, transform, ε)
+end
+
+struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
+    unconstrained_value::T
+    lower_bound::T
+    upper_bound::T
+    transform::V
+    ε::Tε
 end
 
 value(x::Bounded) = x.transform(x.unconstrained_value)
@@ -91,17 +93,6 @@ function flatten(x::Bounded)
 end
 
 """
-    Fixed{T}
-
-Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
-simply its value -- that constantness of the parameter is enforced by returning an empty
-vector from `flatten`.
-"""
-struct Fixed{T} <: AbstractParameter
-    value::T
-end
-
-"""
     fixed(value)
 
 Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
@@ -109,6 +100,10 @@ simply its value -- that constantness of the parameter is enforced by returning 
 vector from `flatten`.
 """
 fixed(value) = Fixed(value)
+
+struct Fixed{T} <: AbstractParameter
+    value::T
+end
 
 value(x::Fixed) = x.value
 
@@ -120,22 +115,22 @@ function flatten(x::Fixed)
 end
 
 """
-    Deferred(f, args...)
+    deferred(f, args...)
 
-The `value` of a `Deferred` is `f(value(args)...)`. This makes it possible to make the value
+The `value` of a `deferred` is `f(value(args)...)`. This makes it possible to make the value
 of the `args` e.g. `AbstractParameter`s and, therefore, enforce constraints on them even if
 `f` knows nothing about `AbstractParameters`.
 
-It can be helpful to use `Deferred` recursively when constructing complicated objects.
+It can be helpful to use `deferred` recursively when constructing complicated objects.
 """
+deferred(value, args...) = Deferred(value, args)
+
 struct Deferred{Tf, Targs} <: AbstractParameter
     f::Tf
     args::Targs
 end
 
 Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
-
-deferred(value, args...) = Deferred(value, args)
 
 value(x::Deferred) = x.f(value(x.args)...)
 
