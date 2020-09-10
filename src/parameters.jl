@@ -29,7 +29,11 @@ positive reals.
 Satisfies `val ≈ transform(unconstrained_value)`
 """
 function positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
-    return Positive(inv(transform)(val - ε), transform, convert(typeof(val), ε))
+    if val <= 0
+        throw(ArgumentError("Value, $val, is not positive."))
+    end
+    unconstrained_value = inv(transform)(val - ε)
+    return Positive(unconstrained_value, transform, convert(typeof(unconstrained_value), ε))
 end
 
 struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
@@ -51,23 +55,30 @@ function flatten(x::Positive)
 end
 
 """
-    bounded(value::Real, lower_bound::Real, upper_bound::Real)
+    bounded(val::Real, lower_bound::Real, upper_bound::Real)
 
 Constructs a `bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
-(`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
-a `transform` that maps any value to reals in (`lower_bound`, `upper_bound`).
+(`lower_bound`, `upper_bound`), and is equal to `val`.
+This is represented internally in terms of an `unconstrained_value` and a `transform` that
+maps any real to this interval. `unconstrained_value` is `inv(transform)(val)`.
 """
-function bounded(value::Real, lower_bound::Real, upper_bound::Real)
-    lb = convert(typeof(value), lower_bound)
-    ub = convert(typeof(value), upper_bound)
-    ε = convert(typeof(value), 1e-12)
+function bounded(val::Real, lower_bound::Real, upper_bound::Real)
+    lb = convert(typeof(val), lower_bound)
+    ub = convert(typeof(val), upper_bound)
+    ε = convert(typeof(val), 1e-12)
+
+    if val > upper_bound || val < lower_bound
+        throw(ArgumentError(
+            "Value, $val, outside of specified bounds ($lower_bound, $upper_bound).",
+        ))
+    end
 
     inv_transform = Bijectors.Logit(lb + ε, ub - ε)
     transform = inv(inv_transform)
 
     # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
-    return Bounded(inv_transform(value), lb, ub, transform, ε)
+    return Bounded(inv_transform(val), lb, ub, transform, ε)
 end
 
 struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
@@ -93,13 +104,13 @@ function flatten(x::Bounded)
 end
 
 """
-    fixed(value)
+    fixed(val)
 
 Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
-simply its value -- that constantness of the parameter is enforced by returning an empty
+simply `val`. Constantness of the parameter is enforced by returning an empty
 vector from `flatten`.
 """
-fixed(value) = Fixed(value)
+fixed(val) = Fixed(val)
 
 struct Fixed{T} <: AbstractParameter
     value::T
@@ -123,7 +134,7 @@ of the `args` e.g. `AbstractParameter`s and, therefore, enforce constraints on t
 
 It can be helpful to use `deferred` recursively when constructing complicated objects.
 """
-deferred(value, args...) = Deferred(value, args)
+deferred(f, args...) = Deferred(f, args)
 
 struct Deferred{Tf, Targs} <: AbstractParameter
     f::Tf

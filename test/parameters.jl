@@ -8,6 +8,8 @@ using ParameterHandling: Positive, Bounded
             test_parameter_interface(p)
             @test value(p) ≈ val
         end
+
+        @test_throws ArgumentError positive(-0.1)
     end
 
     @testset "bounded" begin
@@ -16,6 +18,8 @@ using ParameterHandling: Positive, Bounded
             test_parameter_interface(bounded(-0.05, -0.1, 2.0))
             @test value(p) ≈ val
         end
+
+        @test_throws ArgumentError bounded(-0.05, 0.0, 1.0)
     end
 
     @testset "fixed" begin
