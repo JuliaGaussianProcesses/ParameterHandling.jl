@@ -22,7 +22,7 @@ value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 """
     positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
 
-Returns a `postive`.
+Returns a `Postive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
 This is represented in terms of an a `transform` that maps an `unconstrained_value` to the
 positive reals.
