@@ -1,37 +1,42 @@
+using ParameterHandling: Positive, Bounded
+
 @testset "parameters" begin
 
-    @testset "Postive" begin
-        test_parameter_interface(Positive(5.0))
-        p = Positive(-10.0)
-        @test value(p) > p.ε
-        p = Positive(-Inf)
-        @test value(p) == p.ε
+    @testset "postive" begin
+        @testset "$val" for val in [5.0, 1e-11, 1e-12]
+            p = positive(val)
+            test_parameter_interface(p)
+            @test value(p) ≈ val
+        end
+
+        @test_throws ArgumentError positive(-0.1)
     end
 
-    @testset "Bounded" begin
-        test_parameter_interface(Bounded(-1.0, -0.1, 2.0))
-        p = Bounded(-10.0, -0.1, 2.0)
-        @test value(p) > p.lower_bound
-        p = Bounded(-Inf, -0.1, 2.0)
-        @test value(p) == p.lower_bound + p.ε
-        p = Bounded(10.0, -0.1, 2.0)
-        @test value(p) < p.upper_bound
-        p = Bounded(Inf, -0.1, 2.0)
-        @test value(p) == p.upper_bound - p.ε
+    @testset "bounded" begin
+        @testset "$val" for val in [-0.05, -0.1 + 1e-12, 2.0 - 1e-11, 2.0 - 1e-12]
+            p = bounded(val, -0.1, 2.0)
+            test_parameter_interface(p)
+            @test value(p) ≈ val
+        end
+
+        @test_throws ArgumentError bounded(-0.05, 0.0, 1.0)
     end
 
-    @testset "Fixed" begin
-        test_parameter_interface(Fixed((a=5.0, b=4.0)))
+    @testset "fixed" begin
+        val = (a=5.0, b=4.0)
+        p = fixed(val)
+        test_parameter_interface(p)
+        @test value(p) == val
     end
 
-    @testset "Deferred" begin
-        test_parameter_interface(Deferred(sin, 0.5))
-        test_parameter_interface(Deferred(sin, Positive(log(0.5))))
+    @testset "deferred" begin
+        test_parameter_interface(deferred(sin, 0.5))
+        test_parameter_interface(deferred(sin, positive(0.5)))
         test_parameter_interface(
-            Deferred(
+            deferred(
                 MvNormal,
-                Fixed(randn(5)),
-                Deferred(PDiagMat, Positive.(randn(5))),
+                fixed(randn(5)),
+                deferred(PDiagMat, positive.(rand(5) .+ 1e-1)),
             )
         )
     end
@@ -41,7 +46,7 @@
         return abs2(θ.a) + abs2(θ.b)
     end
 
-    # This is more of a worked example. Will be properly split up / tidied up.
+    # This is more of a worked example.
     @testset "Integration" begin
 
         θ0 = (a=5.0, b=4.0)
@@ -62,7 +67,7 @@
 
     @testset "Other Integration" begin
 
-        θ0 = (a=5.0, b=Fixed(4.0))
+        θ0 = (a=5.0, b=fixed(4.0))
         flat_parameters, unflatten = flatten(θ0)
 
         results = Optim.optimize(
@@ -85,7 +90,7 @@
 
     @testset "Normal" begin
 
-        θ0 = Deferred(Normal, randn(), Positive(log(1.0)))
+        θ0 = deferred(Normal, randn(), positive(1.0))
         flat_parameters, unflatten = flatten(θ0)
 
         results = Optim.optimize(

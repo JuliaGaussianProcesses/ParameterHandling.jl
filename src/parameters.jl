@@ -19,21 +19,28 @@ value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
-
 """
-    Positive(value::Real)
+    positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
 
-The `value` of a `Positive` is a `Real` number that is constrained to be positive. This is
-represented in terms of an `unconstrained_value` and a `transform` that maps any value
-the `unconstrained_value` might take to the positive reals.
+Returns a `Postive`.
+The `value` of a `Positive` is a `Real` number that is constrained to be positive.
+This is represented in terms of an a `transform` that maps an `unconstrained_value` to the
+positive reals.
+Satisfies `val ≈ transform(unconstrained_value)`
 """
+function positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
+    if val <= 0
+        throw(ArgumentError("Value, $val, is not positive."))
+    end
+    unconstrained_value = inv(transform)(val - ε)
+    return Positive(unconstrained_value, transform, convert(typeof(unconstrained_value), ε))
+end
+
 struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     transform::V
     ε::Tε
 end
-
-Positive(value::Real) = Positive(value, Bijectors.Exp(), convert(typeof(value), 1e-12))
 
 value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 
@@ -48,12 +55,32 @@ function flatten(x::Positive)
 end
 
 """
-    Bounded(value::Real, lower_bound::Real, upper_bound::Real)
+    bounded(val::Real, lower_bound::Real, upper_bound::Real)
 
+Constructs a `Bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
-(`lower_bound`, `upper_bound`). This is represented in terms of an `unconstrained_value` and 
-a `transform` that maps any value to reals included by (`lower_bound`, `upper_bound`).
+(`lower_bound`, `upper_bound`), and is equal to `val`.
+This is represented internally in terms of an `unconstrained_value` and a `transform` that
+maps any real to this interval. `unconstrained_value` is `inv(transform)(val)`.
 """
+function bounded(val::Real, lower_bound::Real, upper_bound::Real)
+    lb = convert(typeof(val), lower_bound)
+    ub = convert(typeof(val), upper_bound)
+    ε = convert(typeof(val), 1e-12)
+
+    if val > upper_bound || val < lower_bound
+        throw(ArgumentError(
+            "Value, $val, outside of specified bounds ($lower_bound, $upper_bound).",
+        ))
+    end
+
+    inv_transform = Bijectors.Logit(lb + ε, ub - ε)
+    transform = inv(inv_transform)
+
+    # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
+    return Bounded(inv_transform(val), lb, ub, transform, ε)
+end
+
 struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     lower_bound::T
@@ -62,34 +89,29 @@ struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
     ε::Tε
 end
 
-function Bounded(value::Real, lower_bound::Real, upper_bound::Real)
-    lb = convert(typeof(value), lower_bound)
-    ub = convert(typeof(value), upper_bound)
-    ε = convert(typeof(value), 1e-12)
-
-    # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
-    return Bounded(value, lb, ub, inv(Bijectors.Logit(lb + ε, ub - ε)), ε)
-end
-
 value(x::Bounded) = x.transform(x.unconstrained_value)
 
 function flatten(x::Bounded)
     v, unflatten_to_Real = flatten(x.unconstrained_value)
 
     function unflatten_Bounded(v_new::Vector{<:Real})
-        return Bounded(unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε)
+        return Bounded(
+            unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε,
+        )
     end
 
     return v, unflatten_Bounded
 end
 
 """
-    Fixed{T}
+    fixed(val)
 
 Represents a parameter whose value is required to stay constant. The `value` of a `Fixed` is
-simply its value -- that constantness of the parameter is enforced by returning an empty
+simply `val`. Constantness of the parameter is enforced by returning an empty
 vector from `flatten`.
 """
+fixed(val) = Fixed(val)
+
 struct Fixed{T} <: AbstractParameter
     value::T
 end
@@ -104,20 +126,19 @@ function flatten(x::Fixed)
 end
 
 """
-    Deferred(f, args...)
+    deferred(f, args...)
 
-The `value` of a `Deferred` is `f(value(args)...)`. This makes it possible to make the value
+The `value` of a `deferred` is `f(value(args)...)`. This makes it possible to make the value
 of the `args` e.g. `AbstractParameter`s and, therefore, enforce constraints on them even if
 `f` knows nothing about `AbstractParameters`.
 
-It can be helpful to use `Deferred` recursively when constructing complicated objects.
+It can be helpful to use `deferred` recursively when constructing complicated objects.
 """
+deferred(f, args...) = Deferred(f, args)
+
 struct Deferred{Tf, Targs} <: AbstractParameter
     f::Tf
     args::Targs
-    function Deferred(f::Tf, args...) where {Tf}
-        return new{Tf, typeof(args)}(f, args)
-    end
 end
 
 Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
@@ -129,7 +150,7 @@ function flatten(x::Deferred)
     v, unflatten = flatten(x.args)
 
     function unflatten_Deferred(v_new::Vector{<:Real})
-        return Deferred(x.f, unflatten(v_new)...)
+        return Deferred(x.f, unflatten(v_new))
     end
 
     return v, unflatten_Deferred
