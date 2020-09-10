@@ -15,7 +15,7 @@ using ParameterHandling: Positive, Bounded
     @testset "bounded" begin
         @testset "$val" for val in [-0.05, -0.1 + 1e-12, 2.0 - 1e-11, 2.0 - 1e-12]
             p = bounded(val, -0.1, 2.0)
-            test_parameter_interface(bounded(-0.05, -0.1, 2.0))
+            test_parameter_interface(p)
             @test value(p) ≈ val
         end
 

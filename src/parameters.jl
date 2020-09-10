@@ -22,7 +22,7 @@ value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 """
     positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
 
-Returns a `postive`.
+Returns a `Postive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
 This is represented in terms of an a `transform` that maps an `unconstrained_value` to the
 positive reals.
@@ -57,7 +57,7 @@ end
 """
     bounded(val::Real, lower_bound::Real, upper_bound::Real)
 
-Constructs a `bounded`.
+Constructs a `Bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`), and is equal to `val`.
 This is represented internally in terms of an `unconstrained_value` and a `transform` that
