@@ -25,6 +25,6 @@
     end
 
     @testset "Dict" begin
-        test_flatten_interface(Dict(:a => (a=4.0, b=3.0), :b => 5.0))
+        test_flatten_interface(Dict(:a => (a=4.0, b=3.0), :b => 5.0); check_inferred=false)
     end
 end

@@ -39,7 +39,7 @@ function flatten(x::AbstractVector)
         x_Vec = [backs[n](x_vec[sz[n] - length(x_vecs[n]) + 1:sz[n]]) for n in eachindex(x)]
         return oftype(x, x_Vec)
     end
-    return vcat(x_vecs...), Vector_from_vec
+    return reduce(vcat, x_vecs), Vector_from_vec
 end
 
 function flatten(x::AbstractArray)
@@ -54,11 +54,13 @@ function flatten(x::AbstractArray)
 end
 
 function flatten(x::Tuple)
-    x_vecs, unflattens = zip(map(flatten, x)...)
-    sz = cumsum(collect(map(length, x_vecs)))
+    x_vecs_and_backs = map(flatten, x)
+    x_vecs, x_backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
+    lengths = map(length, x_vecs)
+    sz = cumsum(lengths)
     function unflatten_to_Tuple(v::Vector{<:Real})
-        return ntuple(length(x)) do n
-            return unflattens[n](v[sz[n] - length(x_vecs[n]) + 1:sz[n]])
+        map(x_backs, lengths, sz) do x_back, l, s
+            return x_back(v[s - l + 1:s])
         end
     end
     return reduce(vcat, x_vecs), unflatten_to_Tuple
