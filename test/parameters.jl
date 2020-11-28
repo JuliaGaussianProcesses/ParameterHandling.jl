@@ -1,5 +1,8 @@
 using ParameterHandling: Positive, Bounded
 
+mvnormal(args...) = MvNormal(args...)
+pdiagmat(args...) = PDiagMat(args...)
+
 @testset "parameters" begin
 
     @testset "postive" begin
@@ -34,9 +37,9 @@ using ParameterHandling: Positive, Bounded
         test_parameter_interface(deferred(sin, positive(0.5)))
         test_parameter_interface(
             deferred(
-                MvNormal,
+                mvnormal,
                 fixed(randn(5)),
-                deferred(PDiagMat, positive.(rand(5) .+ 1e-1)),
+                deferred(pdiagmat, positive.(rand(5) .+ 1e-1)),
             )
         )
     end

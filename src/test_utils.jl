@@ -21,13 +21,17 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
     return nothing
 end
 
-function test_parameter_interface(x)
+function test_parameter_interface(x; check_inferred::Bool=true)
 
     # Parameters need to be flatten-able.
-    test_flatten_interface(x)
+    test_flatten_interface(x; check_inferred=check_inferred)
 
     # Run this to make sure that it doesn't error.
     value(x)
+
+    if check_inferred
+        @inferred value(x)
+    end
     return nothing
 end
 
