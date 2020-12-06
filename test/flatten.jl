@@ -16,12 +16,14 @@
     end
 
     @testset "Tuple" begin
-        test_flatten_interface((1.0, 2.0))
-        test_flatten_interface((1.0, (2.0, 3.0), randn(5)))
+        test_flatten_interface((1.0, 2.0); check_inferred=tuple_infers)
+        test_flatten_interface((1.0, (2.0, 3.0), randn(5)); check_inferred=tuple_infers)
     end
 
     @testset "NamedTuple" begin
-        test_flatten_interface((a=1.0, b=(2.0, 3.0), c=(e=5.0,)))
+        test_flatten_interface(
+            (a=1.0, b=(2.0, 3.0), c=(e=5.0,)); check_inferred=tuple_infers,
+        )
     end
 
     @testset "Dict" begin

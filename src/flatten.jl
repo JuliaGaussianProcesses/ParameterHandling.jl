@@ -35,7 +35,7 @@ function flatten(x::AbstractVector)
     x_vecs_and_backs = map(flatten, x)
     x_vecs, backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
     function Vector_from_vec(x_vec)
-        sz = cumsum(map(length, x_vecs))
+        sz = _cumsum(map(length, x_vecs))
         x_Vec = [backs[n](x_vec[sz[n] - length(x_vecs[n]) + 1:sz[n]]) for n in eachindex(x)]
         return oftype(x, x_Vec)
     end
@@ -57,7 +57,7 @@ function flatten(x::Tuple)
     x_vecs_and_backs = map(flatten, x)
     x_vecs, x_backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
     lengths = map(length, x_vecs)
-    sz = cumsum(lengths)
+    sz = _cumsum(lengths)
     function unflatten_to_Tuple(v::Vector{<:Real})
         map(x_backs, lengths, sz) do x_back, l, s
             return x_back(v[s - l + 1:s])
@@ -82,4 +82,9 @@ function flatten(d::Dict)
         return Dict(key => v_vec_vec[n] for (n, key) in enumerate(keys(d)))
     end
     return d_vec, unflatten_to_Dict
+end
+
+_cumsum(x) = cumsum(x)
+if VERSION < v"1.5"
+    _cumsum(x::Tuple) = (_cumsum(collect(x))..., )
 end

@@ -33,14 +33,15 @@ pdiagmat(args...) = PDiagMat(args...)
     end
 
     @testset "deferred" begin
-        test_parameter_interface(deferred(sin, 0.5))
-        test_parameter_interface(deferred(sin, positive(0.5)))
+        test_parameter_interface(deferred(sin, 0.5); check_inferred=tuple_infers)
+        test_parameter_interface(deferred(sin, positive(0.5)); check_inferred=tuple_infers)
         test_parameter_interface(
             deferred(
                 mvnormal,
                 fixed(randn(5)),
                 deferred(pdiagmat, positive.(rand(5) .+ 1e-1)),
-            )
+            );
+            check_inferred=tuple_infers,
         )
     end
 
