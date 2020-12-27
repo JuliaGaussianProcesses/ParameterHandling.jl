@@ -1,5 +1,5 @@
 """
-    flatten(x)
+    flatten([eltype=Float64], x)
 
 Returns a "flattened" representation of `x` as a vector of real numbers, and a function
 `unflatten` that takes a vector of reals of the same length and returns an object of the
@@ -17,22 +17,24 @@ true
 """
 function flatten end
 
-function flatten(x::Integer)
-    v = Float64[]
-    unflatten_Integer(v::Vector{Float64}) = x
-    return v, unflatten_Integer
+flatten(x) = flatten(Float64, x)
+
+function flatten(::Type{T}, x::Integer) where T<:Real
+    v = T[]
+    unflatten_to_Integer(v::Vector{T}) = x
+    return v, unflatten_to_Integer
 end
 
-function flatten(x::AbstractFloat)
-    v = [x]
-    unflatten_to_Real(v::Vector{<:Real}) = only(v)
+function flatten(::Type{T}, x::R) where {T<:Real, R<:Real}
+    v = T[x]
+    unflatten_to_Real(v::Vector{T}) = convert(R, only(v))
     return v, unflatten_to_Real
 end
 
-flatten(x::Vector{<:AbstractFloat}) = (x, identity)
+flatten(::Type{T}, x::Vector{R}) where {T<:Real, R<:Real} = (Vector{T}(x), Vector{R})
 
-function flatten(x::AbstractVector)
-    x_vecs_and_backs = map(flatten, x)
+function flatten(::Type{T}, x::AbstractVector) where T<:Real
+    x_vecs_and_backs = map(val -> flatten(T, val), x)
     x_vecs, backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
     function Vector_from_vec(x_vec)
         sz = _cumsum(map(length, x_vecs))
@@ -42,23 +44,18 @@ function flatten(x::AbstractVector)
     return reduce(vcat, x_vecs), Vector_from_vec
 end
 
-function flatten(x::AbstractArray)
-
-    x_vec, from_vec = flatten(vec(x))
-
-    function Array_from_vec(x_vec)
-        return oftype(x, reshape(from_vec(x_vec), size(x)))
-    end
-
+function flatten(::Type{T}, x::AbstractArray) where T<:Real
+    x_vec, from_vec = flatten(T, vec(x))
+    Array_from_vec(x_vec) = oftype(x, reshape(from_vec(x_vec), size(x)))
     return x_vec, Array_from_vec
 end
 
-function flatten(x::Tuple)
-    x_vecs_and_backs = map(flatten, x)
+function flatten(::Type{T}, x::Tuple) where T<:Real
+    x_vecs_and_backs = map(val -> flatten(T, val), x)
     x_vecs, x_backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
     lengths = map(length, x_vecs)
     sz = _cumsum(lengths)
-    function unflatten_to_Tuple(v::Vector{<:Real})
+    function unflatten_to_Tuple(v::Vector{T})
         map(x_backs, lengths, sz) do x_back, l, s
             return x_back(v[s - l + 1:s])
         end
@@ -66,18 +63,18 @@ function flatten(x::Tuple)
     return reduce(vcat, x_vecs), unflatten_to_Tuple
 end
 
-function flatten(x::NamedTuple)
-    x_vec, unflatten = flatten(values(x))
-    function unflatten_to_NamedTuple(v::Vector{<:Real})
+function flatten(::Type{T}, x::NamedTuple) where T<:Real
+    x_vec, unflatten = flatten(T, values(x))
+    function unflatten_to_NamedTuple(v::Vector{T})
         v_vec_vec = unflatten(v)
         return typeof(x)(v_vec_vec)
     end
     return x_vec, unflatten_to_NamedTuple
 end
 
-function flatten(d::Dict)
-    d_vec, unflatten = flatten(collect(values(d)))
-    function unflatten_to_Dict(v::Vector{<:Real})
+function flatten(::Type{T}, d::Dict) where T<:Real
+    d_vec, unflatten = flatten(T, collect(values(d)))
+    function unflatten_to_Dict(v::Vector{T})
         v_vec_vec = unflatten(v)
         return Dict(key => v_vec_vec[n] for (n, key) in enumerate(keys(d)))
     end
