@@ -44,10 +44,10 @@ end
 
 value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 
-function flatten(x::Positive)
-    v, unflatten_to_Real = flatten(x.unconstrained_value)
+function flatten(::Type{T}, x::Positive) where T<:Real
+    v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
-    function unflatten_Positive(v_new::Vector{<:Real})
+    function unflatten_Positive(v_new::Vector{T})
         return Positive(unflatten_to_Real(v_new), x.transform, x.ε)
     end
 
@@ -91,10 +91,10 @@ end
 
 value(x::Bounded) = x.transform(x.unconstrained_value)
 
-function flatten(x::Bounded)
-    v, unflatten_to_Real = flatten(x.unconstrained_value)
+function flatten(::Type{T}, x::Bounded) where T<:Real
+    v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
-    function unflatten_Bounded(v_new::Vector{<:Real})
+    function unflatten_Bounded(v_new::Vector{T})
         return Bounded(
             unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε,
         )
@@ -118,11 +118,9 @@ end
 
 value(x::Fixed) = x.value
 
-function flatten(x::Fixed)
-
-    unflatten_Fixed(v_new::Vector{<:Real}) = x
-
-    return Float64[], unflatten_Fixed
+function flatten(::Type{T}, x::Fixed) where T<:Real
+    unflatten_Fixed(v_new::Vector{T}) = x
+    return T[], unflatten_Fixed
 end
 
 """
@@ -145,13 +143,8 @@ Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
 
 value(x::Deferred) = x.f(value(x.args)...)
 
-function flatten(x::Deferred)
-
-    v, unflatten = flatten(x.args)
-
-    function unflatten_Deferred(v_new::Vector{<:Real})
-        return Deferred(x.f, unflatten(v_new))
-    end
-
+function flatten(::Type{T}, x::Deferred) where T<:Real
+    v, unflatten = flatten(T, x.args)
+    unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end

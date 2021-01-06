@@ -1,11 +1,12 @@
 name = "ParameterHandling"
 uuid = "2412ca09-6db7-441c-8e3a-88d5709968c5"
 authors = ["Invenia Technical Computing Corporation"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
