@@ -20,7 +20,7 @@ value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
 """
-    positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
+    positive(val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T))) where T<:Real
 
 Returns a `Postive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
@@ -28,10 +28,11 @@ This is represented in terms of an a `transform` that maps an `unconstrained_val
 positive reals.
 Satisfies `val ≈ transform(unconstrained_value)`
 """
-function positive(val::Real, transform::Bijector=Bijectors.Exp(), ε::Real = 1e-12)
-    if val <= 0
-        throw(ArgumentError("Value, $val, is not positive."))
-    end
+function positive(
+    val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T)),
+) where T<:Real
+    val > 0 || throw(ArgumentError("Value ($val) is not positive."))
+    val > ε || throw(ArgumentError("Value ($val) is too small, relative to ε ($ε)."))
     unconstrained_value = inv(transform)(val - ε)
     return Positive(unconstrained_value, transform, convert(typeof(unconstrained_value), ε))
 end
