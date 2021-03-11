@@ -156,6 +156,7 @@ end
 Project `X` onto the closest orthogonal matrix in Frobenius norm.
 """
 @inline function nearest_orthogonal_matrix(X::StridedMatrix)
+    # Inlining necessary for type inference for some reason.
     U, _, V = svd(X)
     return U * V'
 end
