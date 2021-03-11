@@ -180,7 +180,7 @@ struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
     X::TX
 end
 
-Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == X.Y
+Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 
 value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
