@@ -2,6 +2,7 @@ module ParameterHandling
 
 using Bijectors
 using Compat: only
+using LinearAlgebra
 
 export flatten, positive, bounded, fixed, deferred
 
