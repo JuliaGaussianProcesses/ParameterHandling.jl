@@ -49,6 +49,16 @@ pdiagmat(args...) = PDiagMat(args...)
         )
     end
 
+    @testset "orthogonal" begin
+        is_almost_orthogonal(X::AbstractMatrix, tol) = norm(X'X - I) < tol
+        @testset "nearest_orthogonal_matrix" begin
+            X_orth = ParameterHandling.nearest_orthogonal_matrix(randn(5, 4))
+            @test is_almost_orthogonal(X_orth, 1e-9)
+            X_orth_2 = ParameterHandling.nearest_orthogonal_matrix(X_orth)
+            @test X_orth ≈ X_orth_2 # nearest_orthogonal_matrix is a projection.
+        end
+    end
+
     function objective_function(unflatten, flat_θ::Vector{<:Real})
         θ = value(unflatten(flat_θ))
         return abs2(θ.a) + abs2(θ.b)

@@ -149,3 +149,32 @@ function flatten(::Type{T}, x::Deferred) where T<:Real
     unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end
+
+"""
+    nearest_orthogonal_matrix(X::StridedMatrix)
+
+Project `X` onto the closest orthogonal matrix in Frobenius norm.
+"""
+function nearest_orthogonal_matrix(X::StridedMatrix)
+    U, _, V = svd(X)
+    return U * V'
+end
+
+"""
+    orthogonal(X::StridedMatrix{<:Real})
+
+This is a slightly strange transformation in that it's not a bijection. We project
+"""
+orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
+
+struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
+    X::TX
+end
+
+Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == X.Y
+
+value(X::Orthogonal) = nearest_orthogonal_matrix(X)
+
+function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
+    unflatten_Orthogonal()
+end
