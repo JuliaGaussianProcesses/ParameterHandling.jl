@@ -154,6 +154,8 @@ end
     nearest_orthogonal_matrix(X::StridedMatrix)
 
 Project `X` onto the closest orthogonal matrix in Frobenius norm.
+
+Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
 @inline function nearest_orthogonal_matrix(X::StridedMatrix)
     # Inlining necessary for type inference for some reason.
@@ -164,7 +166,13 @@ end
 """
     orthogonal(X::StridedMatrix{<:Real})
 
-This is a slightly strange transformation in that it's not a bijection
+Produce a parameter whose `value` is constrained to be positive. The argument `X` need not
+be orthogonal.
+
+This functionality projects `X` onto the nearest element subspace of orthogonal matrices (in
+Frobenius norm) and is overparametrised as a consequence.
+
+Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
 orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
 
