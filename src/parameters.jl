@@ -155,7 +155,7 @@ end
 
 Project `X` onto the closest orthogonal matrix in Frobenius norm.
 """
-function nearest_orthogonal_matrix(X::StridedMatrix)
+@inline function nearest_orthogonal_matrix(X::StridedMatrix)
     U, _, V = svd(X)
     return U * V'
 end
@@ -163,7 +163,7 @@ end
 """
     orthogonal(X::StridedMatrix{<:Real})
 
-This is a slightly strange transformation in that it's not a bijection. We project
+This is a slightly strange transformation in that it's not a bijection
 """
 orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
 
@@ -173,8 +173,10 @@ end
 
 Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == X.Y
 
-value(X::Orthogonal) = nearest_orthogonal_matrix(X)
+value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
 function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
-    unflatten_Orthogonal()
+    v, _unflatten = flatten(T, X.X)
+    unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(_unflatten(v_new))
+    return v, unflatten_Orthogonal
 end

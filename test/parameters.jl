@@ -57,6 +57,8 @@ pdiagmat(args...) = PDiagMat(args...)
             X_orth_2 = ParameterHandling.nearest_orthogonal_matrix(X_orth)
             @test X_orth ≈ X_orth_2 # nearest_orthogonal_matrix is a projection.
         end
+
+        test_parameter_interface(orthogonal(randn(5, 4)))
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})
