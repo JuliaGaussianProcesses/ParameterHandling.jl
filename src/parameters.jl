@@ -166,7 +166,7 @@ end
 """
     orthogonal(X::StridedMatrix{<:Real})
 
-Produce a parameter whose `value` is constrained to be positive. The argument `X` need not
+Produce a parameter whose `value` is constrained to be an orthogonal matrix. The argument `X` need not
 be orthogonal.
 
 This functionality projects `X` onto the nearest element subspace of orthogonal matrices (in
