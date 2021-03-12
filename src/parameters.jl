@@ -174,9 +174,9 @@ Frobenius norm) and is overparametrised as a consequence.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-orthogonal(X::StridedMatrix{<:Union{Real, Complex}}) = Orthogonal(X)
+orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
 
-struct Orthogonal{TX<:StridedMatrix{<:Union{Real, Complex}}} <: AbstractParameter
+struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
     X::TX
 end
 
@@ -184,7 +184,7 @@ Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 
 value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
-function flatten(::Type{T}, X::Orthogonal) where {T<:Union{Real, Complex}}
+function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     v, _unflatten = flatten(T, X.X)
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(_unflatten(v_new))
     return v, unflatten_Orthogonal
