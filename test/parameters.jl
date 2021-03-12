@@ -62,7 +62,7 @@ pdiagmat(args...) = PDiagMat(args...)
         X = orthogonal(randn(5, 4))
         @test X == X
         test_parameter_interface(X)
-        is_almost_orthogonal(value(X), 1e-9)
+        @test is_almost_orthogonal(value(X), 1e-9)
 
         # We do not implement any custom rrules, so we only check that `Zygote` is able to
         # differentiate, and assume that the result is correct if it doesn't error.
