@@ -185,7 +185,7 @@ Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
 function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
-    v, _unflatten = flatten(T, X.X)
+    v, unflatten_to_Array = flatten(T, X.X)
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(_unflatten(v_new))
     return v, unflatten_Orthogonal
 end
