@@ -62,6 +62,13 @@ pdiagmat(args...) = PDiagMat(args...)
         @test X == X
         test_parameter_interface(X)
         is_almost_orthogonal(value(X), 1e-9)
+
+        # We do not implement any custom rrules, so we only check that `Zygote` is able to
+        # differentiate, and assume that the result is correct if it doesn't error.
+        @testset "Zygote" begin
+            _, pb = Zygote.pullback(X -> value(orthogonal(X)), randn(3, 2))
+            @test only(pb(randn(3, 2))) isa Matrix{<:Real}
+        end
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})
