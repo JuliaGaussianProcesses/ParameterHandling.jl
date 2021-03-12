@@ -157,7 +157,7 @@ Project `X` onto the closest orthogonal matrix in Frobenius norm.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-@inline function nearest_orthogonal_matrix(X::StridedMatrix)
+@inline function nearest_orthogonal_matrix(X::StridedMatrix{<:Union{Real, Complex}})
     # Inlining necessary for type inference for some reason.
     U, _, V = svd(X)
     return U * V'
@@ -174,9 +174,9 @@ Frobenius norm) and is overparametrised as a consequence.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
+orthogonal(X::StridedMatrix{<:Union{Real, Complex}}) = Orthogonal(X)
 
-struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
+struct Orthogonal{TX<:StridedMatrix{<:Union{Real, Complex}}} <: AbstractParameter
     X::TX
 end
 
@@ -184,7 +184,7 @@ Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 
 value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
-function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
+function flatten(::Type{T}, X::Orthogonal) where {T<:Union{Real, Complex}}
     v, _unflatten = flatten(T, X.X)
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(_unflatten(v_new))
     return v, unflatten_Orthogonal
