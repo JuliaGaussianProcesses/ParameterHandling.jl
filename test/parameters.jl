@@ -51,8 +51,9 @@ pdiagmat(args...) = PDiagMat(args...)
 
     @testset "orthogonal" begin
         is_almost_orthogonal(X::AbstractMatrix, tol) = norm(X'X - I) < tol
-        @testset "nearest_orthogonal_matrix" begin
-            X_orth = ParameterHandling.nearest_orthogonal_matrix(randn(5, 4))
+
+        @testset "nearest_orthogonal_matrix($T)" for T in [Float64, ComplexF64]
+            X_orth = ParameterHandling.nearest_orthogonal_matrix(randn(T, 5, 4))
             @test is_almost_orthogonal(X_orth, 1e-9)
             X_orth_2 = ParameterHandling.nearest_orthogonal_matrix(X_orth)
             @test X_orth ≈ X_orth_2 # nearest_orthogonal_matrix is a projection.
