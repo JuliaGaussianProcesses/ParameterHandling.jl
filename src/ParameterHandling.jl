@@ -2,8 +2,9 @@ module ParameterHandling
 
 using Bijectors
 using Compat: only
+using LinearAlgebra
 
-export flatten, positive, bounded, fixed, deferred
+export flatten, positive, bounded, fixed, deferred, orthogonal
 
 include("flatten.jl")
 include("parameters.jl")

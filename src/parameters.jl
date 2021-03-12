@@ -149,3 +149,43 @@ function flatten(::Type{T}, x::Deferred) where T<:Real
     unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end
+
+"""
+    nearest_orthogonal_matrix(X::StridedMatrix)
+
+Project `X` onto the closest orthogonal matrix in Frobenius norm.
+
+Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
+"""
+@inline function nearest_orthogonal_matrix(X::StridedMatrix{<:Union{Real, Complex}})
+    # Inlining necessary for type inference for some reason.
+    U, _, V = svd(X)
+    return U * V'
+end
+
+"""
+    orthogonal(X::StridedMatrix{<:Real})
+
+Produce a parameter whose `value` is constrained to be an orthogonal matrix. The argument `X` need not
+be orthogonal.
+
+This functionality projects `X` onto the nearest element subspace of orthogonal matrices (in
+Frobenius norm) and is overparametrised as a consequence.
+
+Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
+"""
+orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
+
+struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
+    X::TX
+end
+
+Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
+
+value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
+
+function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
+    v, unflatten_to_Array = flatten(T, X.X)
+    unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
+    return v, unflatten_Orthogonal
+end

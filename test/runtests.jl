@@ -1,6 +1,7 @@
 using Bijectors
 using Compat: only
 using Distributions
+using LinearAlgebra
 using Optim
 using ParameterHandling
 using PDMats

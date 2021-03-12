@@ -49,6 +49,29 @@ pdiagmat(args...) = PDiagMat(args...)
         )
     end
 
+    @testset "orthogonal" begin
+        is_almost_orthogonal(X::AbstractMatrix, tol) = norm(X'X - I) < tol
+
+        @testset "nearest_orthogonal_matrix($T)" for T in [Float64, ComplexF64]
+            X_orth = ParameterHandling.nearest_orthogonal_matrix(randn(T, 5, 4))
+            @test is_almost_orthogonal(X_orth, 1e-9)
+            X_orth_2 = ParameterHandling.nearest_orthogonal_matrix(X_orth)
+            @test X_orth ≈ X_orth_2 # nearest_orthogonal_matrix is a projection.
+        end
+
+        X = orthogonal(randn(5, 4))
+        @test X == X
+        test_parameter_interface(X)
+        @test is_almost_orthogonal(value(X), 1e-9)
+
+        # We do not implement any custom rrules, so we only check that `Zygote` is able to
+        # differentiate, and assume that the result is correct if it doesn't error.
+        @testset "Zygote" begin
+            _, pb = Zygote.pullback(X -> value(orthogonal(X)), randn(3, 2))
+            @test only(pb(randn(3, 2))) isa Matrix{<:Real}
+        end
+    end
+
     function objective_function(unflatten, flat_θ::Vector{<:Real})
         θ = value(unflatten(flat_θ))
         return abs2(θ.a) + abs2(θ.b)
