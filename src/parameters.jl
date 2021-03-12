@@ -186,6 +186,6 @@ value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
 function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     v, unflatten_to_Array = flatten(T, X.X)
-    unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(_unflatten(v_new))
+    unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
     return v, unflatten_Orthogonal
 end
