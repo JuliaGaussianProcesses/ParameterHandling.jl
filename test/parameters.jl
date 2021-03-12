@@ -61,7 +61,7 @@ pdiagmat(args...) = PDiagMat(args...)
         X = orthogonal(randn(5, 4))
         @test X == X
         test_parameter_interface(X)
-        is_almost_orthogonal(value(X))
+        is_almost_orthogonal(value(X), 1e-9)
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})
