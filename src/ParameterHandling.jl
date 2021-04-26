@@ -3,6 +3,7 @@ module ParameterHandling
 using Bijectors
 using Compat: only
 using LinearAlgebra
+using SparseArrays
 
 export flatten, positive, bounded, fixed, deferred, orthogonal
 
