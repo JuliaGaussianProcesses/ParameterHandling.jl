@@ -7,6 +7,7 @@ using ParameterHandling
 using PDMats
 using Test
 using Zygote
+using SparseArrays
 
 using ParameterHandling: value
 using ParameterHandling.TestUtils: test_flatten_interface, test_parameter_interface
