@@ -1,7 +1,7 @@
 name = "ParameterHandling"
 uuid = "2412ca09-6db7-441c-8e3a-88d5709968c5"
 authors = ["Invenia Technical Computing Corporation"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
