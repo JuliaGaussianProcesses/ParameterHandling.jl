@@ -50,6 +50,12 @@ function flatten(::Type{T}, x::AbstractArray) where T<:Real
     return x_vec, Array_from_vec
 end
 
+function flatten(::Type{T}, x::SparseMatrixCSC) where T<:Real
+    x_vec, from_vec = flatten(T, x.nzval)
+    Array_from_vec(x_vec) = SparseMatrixCSC(x.m, x.n, x.colptr, x.rowval, from_vec(x_vec))
+    return x_vec, Array_from_vec
+end
+
 function flatten(::Type{T}, x::Tuple) where T<:Real
     x_vecs_and_backs = map(val -> flatten(T, val), x)
     x_vecs, x_backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)

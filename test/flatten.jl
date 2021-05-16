@@ -15,6 +15,10 @@
         test_flatten_interface([randn(5) for _ in 1:3])
     end
 
+    @testset "SparseMatrixCSC" begin
+        test_flatten_interface(sprand(10, 10, 0.5))
+    end
+
     @testset "Tuple" begin
         test_flatten_interface((1.0, 2.0); check_inferred=tuple_infers)
 
