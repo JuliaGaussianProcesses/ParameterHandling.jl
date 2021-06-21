@@ -172,11 +172,14 @@ package doesn't currently support the functionality that you need.
 
 # A Worked Example
 
-We use a model involving a Gaussian process -- you don't need to know anything about
+
+
+We use a model involving a Gaussian process (GP) -- you don't need to know anything about
 Gaussian processes other than
 1. they are a class of probabilistic model which can be used for regression (amongst other things).
 2. they have some tunable free-parameters that are usually tuned using an iterative
 optimisation algorithm -- typically a variant on gradient descent.
+Ths is representative of a large number of models in ML / statistics / optimisation.
 
 This example can be copy+pasted into a REPL session.
 
@@ -188,12 +191,12 @@ Pkg.add("Optim")
 Pkg.add("Zygote")
 Pkg.add("AbstractGPs")
 
-using ParameterHandling # Load up this package.
+using ParameterHandling # load up this package.
 using Optim # generic optimisation
 using Zygote # algorithmic differentiation
 using AbstractGPs # package containing the models we'll be working with
 
-# Declare a named tuple containing an initial guess at parameters.
+# Declare a NamedTuple containing an initial guess at parameters.
 raw_initial_params = (
     k1 = (
         var=positive(0.9),
@@ -206,19 +209,19 @@ raw_initial_params = (
     noise_var=positive(0.2),
 )
 
-# Using ParameterHandling.flatten, we can obtain both a `Vector{Float64}` representation of
+# Using ParameterHandling.flatten, we can obtain both a Vector{Float64} representation of
 # these parameters, and a mapping from that vector back to the original parameters:
 flat_initial_params, unflatten = ParameterHandling.flatten(raw_initial_params)
 
-# ParameterHandling.value strips out all of the `Positive` types in `initial_params`,
-# returning a plain named tuple of named tuples and Float64s`.
+# ParameterHandling.value strips out all of the Positive types in initial_params,
+# returning a plain named tuple of named tuples and Float64s.
 initial_params = ParameterHandling.value(raw_initial_params)
 
-# We define `unpack` to map directly from the flat `Vector{Float64}` representation, to a
-# the named tuple representation with all AbstractParameter types removed.
+# We define unpack to map directly from the flat Vector{Float64} representation to a
+# the NamedTuple representation with all the Positive types removed.
 unpack = ParameterHandling.value ∘ unflatten
 
-# GP-specific functionality -- construct a GP. Don't worry about the details, just
+# GP-specific functionality. Don't worry about the details, just
 # note the use of the structured representation of the parameters.
 function build_gp(params)
     k1 = params.k1.var * Matern52Kernel() ∘ ScaleTransform(params.k1.precision)
@@ -238,15 +241,15 @@ function objective(params)
 end
 
 # Use Optim.jl to minimise the objective function w.r.t. the params.
-# The important thing here is to note that we're passing in the flat vector of parameters,
-# which is something that Optim knows how to work with, and converting from the flat
-# representation that Optim knows about, to the structure representation that our
-# objective function knows about, using the `unpack` function we defined using
-# ParameterHandling.jl.
+# The important thing here is to note that we're passing in the flat vector of parameters to
+# Optim, which is something that Optim knows how to work with, and using `unpack` to convert
+# from this representation to the structured one that our objective function knows about
+# using `unpack` -- we've used ParameterHandling to build a bridge between Optim and an
+# entirely unrelated package.
 training_results = Optim.optimize(
     objective ∘ unpack,
     θ -> only(Zygote.gradient(objective ∘ unpack, θ)),
-    flat_initial_params + randn(length(flat_initial_params)),
+    flat_initial_params,
     BFGS(
         alphaguess = Optim.LineSearches.InitialStatic(scaled=true),
         linesearch = Optim.LineSearches.BackTracking(),
