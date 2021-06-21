@@ -169,6 +169,104 @@ package doesn't currently support the functionality that you need.
 
 
 
+
+# A Worked Example
+
+We use a model involving a Gaussian process -- you don't need to know anything about
+Gaussian processes other than
+1. they are a class of probabilistic model which can be used for regression (amongst other things).
+2. they have some tunable free-parameters that are usually tuned using an iterative
+optimisation algorithm -- typically a variant on gradient descent.
+
+This example can be copy+pasted into a REPL session.
+
+```julia
+# Install some packages.
+using Pkg
+Pkg.add("ParameterHandling")
+Pkg.add("Optim")
+Pkg.add("Zygote")
+Pkg.add("AbstractGPs")
+
+using ParameterHandling # Load up this package.
+using Optim # generic optimisation
+using Zygote # algorithmic differentiation
+using AbstractGPs # package containing the models we'll be working with
+
+# Declare a named tuple containing an initial guess at parameters.
+raw_initial_params = (
+    k1 = (
+        var=positive(0.9),
+        precision=positive(1.0),
+    ),
+    k2 = (
+        var=positive(0.1),
+        precision=positive(0.3),
+    ),
+    noise_var=positive(0.2),
+)
+
+# Using ParameterHandling.flatten, we can obtain both a `Vector{Float64}` representation of
+# these parameters, and a mapping from that vector back to the original parameters:
+flat_initial_params, unflatten = ParameterHandling.flatten(raw_initial_params)
+
+# ParameterHandling.value strips out all of the `Positive` types in `initial_params`,
+# returning a plain named tuple of named tuples and Float64s`.
+initial_params = ParameterHandling.value(raw_initial_params)
+
+# We define `unpack` to map directly from the flat `Vector{Float64}` representation, to a
+# the named tuple representation with all AbstractParameter types removed.
+unpack = ParameterHandling.value ∘ unflatten
+
+# GP-specific functionality -- construct a GP. Don't worry about the details, just
+# note the use of the structured representation of the parameters.
+function build_gp(params)
+    k1 = params.k1.var * Matern52Kernel() ∘ ScaleTransform(params.k1.precision)
+    k2 = params.k2.var * SEKernel() ∘ ScaleTransform(params.k2.precision)
+    return GP(k1 + k2)
+end
+
+# Generate some synthetic training data.
+# Again, don't worry too much about the specifics here.
+const x = range(-5.0, 5.0; length=100)
+const y = rand(build_gp(initial_params)(x, initial_params.noise_var))
+
+# Specify an objective function in terms of x and y.
+function objective(params)
+    f = build_gp(params)
+    return -logpdf(f(x, params.noise_var), y)
+end
+
+# Use Optim.jl to minimise the objective function w.r.t. the params.
+# The important thing here is to note that we're passing in the flat vector of parameters,
+# which is something that Optim knows how to work with, and converting from the flat
+# representation that Optim knows about, to the structure representation that our
+# objective function knows about, using the `unpack` function we defined using
+# ParameterHandling.jl.
+training_results = Optim.optimize(
+    objective ∘ unpack,
+    θ -> only(Zygote.gradient(objective ∘ unpack, θ)),
+    flat_initial_params + randn(length(flat_initial_params)),
+    BFGS(
+        alphaguess = Optim.LineSearches.InitialStatic(scaled=true),
+        linesearch = Optim.LineSearches.BackTracking(),
+    ),
+    Optim.Options(show_trace = true);
+    inplace=false,
+)
+
+# Extracting the final values of the parameters.
+final_params = unpack(training_results.minimizer)
+f_trained = build_gp(final_params)
+```
+
+Usually you would go on to make some predictions on test data using `f_trained`, or
+something like that.
+From the perspective of ParameterHandling.jl, we've seen the interesting stuff though.
+In particular, we've seen an example of how ParameterHandling.jl can be used to bridge the
+gap between the "flat" representation of parameters that `Optim` likes to work with, and the
+"structured" representation that it's convenient to write optimisation algorithms with.
+
 # Gotchas
 
 1. `Integer`s typically don't take part in the kind of optimisation procedures that this package is designed to handle. Consequently, `flatten(::Integer)` produces an empty vector.
