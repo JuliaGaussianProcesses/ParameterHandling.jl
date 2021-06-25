@@ -223,7 +223,7 @@ unpack = ParameterHandling.value ∘ unflatten
 
 # GP-specific functionality. Don't worry about the details, just
 # note the use of the structured representation of the parameters.
-function build_gp(params)
+function build_gp(params::NamedTuple)
     k1 = params.k1.var * Matern52Kernel() ∘ ScaleTransform(params.k1.precision)
     k2 = params.k2.var * SEKernel() ∘ ScaleTransform(params.k2.precision)
     return GP(k1 + k2)
@@ -235,7 +235,7 @@ const x = range(-5.0, 5.0; length=100)
 const y = rand(build_gp(initial_params)(x, initial_params.noise_var))
 
 # Specify an objective function in terms of x and y.
-function objective(params)
+function objective(params::NamedTuple)
     f = build_gp(params)
     return -logpdf(f(x, params.noise_var), y)
 end
