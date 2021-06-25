@@ -215,7 +215,8 @@ flat_initial_params, unflatten = ParameterHandling.flatten(raw_initial_params)
 
 # ParameterHandling.value strips out all of the Positive types in initial_params,
 # returning a plain named tuple of named tuples and Float64s.
-initial_params = ParameterHandling.value(raw_initial_params)
+julia> initial_params = ParameterHandling.value(raw_initial_params)
+(k1 = (var = 0.9, precision = 1.0), k2 = (var = 0.10000000000000002, precision = 0.30000000000000004), noise_var = 0.19999999999999998)
 
 # We define unpack to map directly from the flat Vector{Float64} representation to a
 # the NamedTuple representation with all the Positive types removed.
