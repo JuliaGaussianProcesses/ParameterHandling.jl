@@ -201,7 +201,7 @@ The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
 function positive_definite(X::StridedMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
-    PositiveDefinite(tril_to_vec(cholesky(X).L))
+    return PositiveDefinite(tril_to_vec(cholesky(X).L))
 end
 struct PositiveDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
     L::TL
@@ -235,4 +235,3 @@ function tril_to_vec(X::AbstractMatrix{T}) where {T}
     n == m || error("Matrix needs to be square")
     return X[tril!(trues(size(X)))]
 end
-
