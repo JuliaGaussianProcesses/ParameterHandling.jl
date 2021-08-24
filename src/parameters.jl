@@ -178,7 +178,7 @@ orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
 
 struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
     X::TX
-end
+end 
 
 Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 
@@ -189,3 +189,58 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
     return v, unflatten_Orthogonal
 end
+
+
+"""
+    positive_definite(X::StridedMatrix{<:Real})
+
+Produce a prameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
+be a positive-definite matrix or a `Cholesky` object.
+
+The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
+"""
+function positive_definite(X::StridedMatrix{<:Real})
+    isposdef(X) || throw(ArgumentError("X is not positive-definite"))
+    PositiveDefinite(tril_to_vec(cholesky(X).L))
+end
+struct PositiveDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
+    L::TL
+end
+
+Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L
+
+A_At(X) = X * X'
+
+value(X::PositiveDefinite) = A_At(vec_to_tril(X.L))
+
+function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
+    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(v_new)
+    return X.L, unflatten_PositiveDefinite
+end
+
+# Convert a vector to lower-triangular matrix
+function vec_to_tril(v::AbstractVector{T}) where {T}
+    n_vec = length(v)
+    n_tril = Int((sqrt(1 + 8 * n_vec) - 1) / 2) # Infer the size of the matrix from the vector
+    L = zeros(T, n_tril, n_tril)
+    L[tril!(trues(size(L)))] = v
+    return L
+end
+
+# Convert a lower-triangular matrix to a vector (without the zeros)
+# Adapted from https://stackoverflow.com/questions/50651781/extract-lower-triangle-portion-of-a-matrix
+function tril_to_vec(X::AbstractMatrix{T}) where {T}
+    n, m = size(X)
+    n == m || error("Matrix needs to be square")
+    return v = X[tril!(trues(size(X)))]
+
+    v = Vector{T}(undef, (n * (n + 1)) ÷ 2)
+    k = 0
+    for i in 1:n
+        for j in 1:i
+            v[j * (j - 1) ÷ 2 + i] = X[i, j]
+        end
+    end
+    return v
+end
+

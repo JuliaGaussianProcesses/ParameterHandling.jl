@@ -1,4 +1,5 @@
 using ParameterHandling: Positive, Bounded
+using ParameterHandling: vec_to_tril, tril_to_vec
 
 mvnormal(args...) = MvNormal(args...)
 pdiagmat(args...) = PDiagMat(args...)
@@ -70,6 +71,22 @@ pdiagmat(args...) = PDiagMat(args...)
             _, pb = Zygote.pullback(X -> value(orthogonal(X)), randn(3, 2))
             @test only(pb(randn(3, 2))) isa Matrix{<:Real}
         end
+    end
+
+    @testset "positive_definite" begin
+        @testset "vec_tril_conversion" begin
+            X = tril!(rand(3, 3))
+            @test vec_to_tril(tril_to_vec(X)) == X
+            @test_throws ArgumentError tril_to_vec(rand(4, 5)) 
+        end
+        A = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
+        X = positive_definite(A)
+        @test X == X
+        @test value(X) ≈ A
+        @test isposdef(value(X))
+        @test vec_to_tril(X.L) ≈ cholesky(A).L
+        @test_throws ArgumentError positive_definite(rand(3, 3))
+        test_parameter_interface(X)
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})
