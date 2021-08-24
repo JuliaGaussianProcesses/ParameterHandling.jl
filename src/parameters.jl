@@ -174,11 +174,12 @@ Frobenius norm) and is overparametrised as a consequence.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
-
+function orthogonal(X::StridedMatrix{<:Real})
+    Orthogonal(X)
+end
 struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
     X::TX
-end 
+end
 
 Base.:(==)(X::Orthogonal, Y::Orthogonal) = X.X == Y.X
 
@@ -189,7 +190,6 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
     return v, unflatten_Orthogonal
 end
-
 
 """
     positive_definite(X::StridedMatrix{<:Real})
@@ -203,6 +203,7 @@ function positive_definite(X::StridedMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
     return PositiveDefinite(tril_to_vec(cholesky(X).L))
 end
+
 struct PositiveDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
     L::TL
 end
