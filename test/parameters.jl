@@ -77,7 +77,7 @@ pdiagmat(args...) = PDiagMat(args...)
         @testset "vec_tril_conversion" begin
             X = tril!(rand(3, 3))
             @test vec_to_tril(tril_to_vec(X)) == X
-            @test_throws ArgumentError tril_to_vec(rand(4, 5)) 
+            @test_throws ErrorException tril_to_vec(rand(4, 5)) 
         end
         A = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
         X = positive_definite(A)

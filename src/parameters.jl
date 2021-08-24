@@ -214,8 +214,9 @@ A_At(X) = X * X'
 value(X::PositiveDefinite) = A_At(vec_to_tril(X.L))
 
 function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
-    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(v_new)
-    return X.L, unflatten_PositiveDefinite
+    v, unflatten_v = flatten(T, X.L)
+    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(unflatten_v(v_new))
+    return v, unflatten_PositiveDefinite
 end
 
 # Convert a vector to lower-triangular matrix
@@ -232,15 +233,6 @@ end
 function tril_to_vec(X::AbstractMatrix{T}) where {T}
     n, m = size(X)
     n == m || error("Matrix needs to be square")
-    return v = X[tril!(trues(size(X)))]
-
-    v = Vector{T}(undef, (n * (n + 1)) ÷ 2)
-    k = 0
-    for i in 1:n
-        for j in 1:i
-            v[j * (j - 1) ÷ 2 + i] = X[i, j]
-        end
-    end
-    return v
+    return X[tril!(trues(size(X)))]
 end
 
