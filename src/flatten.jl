@@ -33,9 +33,15 @@ end
 
 flatten(::Type{T}, x::Vector{R}) where {T<:Real, R<:Real} = (Vector{T}(x), Vector{R})
 
-function flatten(::Type{T}, x::AbstractVector{<:Integer}) where {T<:Real}
+function _flatten_vector_integer(::Type{T}, x::AbstractVector{<:Integer}) where {T<:Real}
     unflatten_to_Vector_Integer(x_vec) = x
     return T[], unflatten_to_Vector_Integer
+end
+
+flatten(::Type{T}, x::Vector{<:Integer}) where {T<:Real} = _flatten_vector_integer(T, x)
+
+function flatten(::Type{T}, x::AbstractVector{<:Integer}) where {T<:Real}
+    return _flatten_vector_integer(T, x)
 end
 
 function flatten(::Type{T}, x::AbstractVector) where T<:Real
