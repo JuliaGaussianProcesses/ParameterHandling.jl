@@ -31,7 +31,7 @@ function flatten(::Type{T}, x::R) where {T<:Real, R<:Real}
     return v, unflatten_to_Real
 end
 
-flatten(::Type{T}, x::Vector{R}) where {T<:Real, R<:Real} = (Vector{T}(x), Vector{R})
+flatten(::Type{T}, x::Vector{R}) where {T<:Real,R<:Real} = (Vector{T}(x), Vector{R})
 
 function _flatten_vector_integer(::Type{T}, x::AbstractVector{<:Integer}) where {T<:Real}
     unflatten_to_Vector_Integer(x_vec) = x
@@ -44,7 +44,7 @@ function flatten(::Type{T}, x::AbstractVector{<:Integer}) where {T<:Real}
     return _flatten_vector_integer(T, x)
 end
 
-function flatten(::Type{T}, x::AbstractVector) where T<:Real
+function flatten(::Type{T}, x::AbstractVector) where {T<:Real}
     x_vecs_and_backs = map(val -> flatten(T, val), x)
     x_vecs, backs = first.(x_vecs_and_backs), last.(x_vecs_and_backs)
     function Vector_from_vec(x_vec)
