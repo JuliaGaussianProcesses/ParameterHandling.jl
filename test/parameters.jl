@@ -1,4 +1,5 @@
 using ParameterHandling: Positive, Bounded
+using ParameterHandling: vec_to_tril, tril_to_vec
 
 mvnormal(args...) = MvNormal(args...)
 pdiagmat(args...) = PDiagMat(args...)
@@ -70,6 +71,37 @@ pdiagmat(args...) = PDiagMat(args...)
             _, pb = Zygote.pullback(X -> value(orthogonal(X)), randn(3, 2))
             @test only(pb(randn(3, 2))) isa Matrix{<:Real}
         end
+    end
+
+    @testset "positive_definite" begin
+        @testset "vec_tril_conversion" begin
+            X = tril!(rand(3, 3))
+            @test vec_to_tril(tril_to_vec(X)) == X
+            @test_throws ErrorException tril_to_vec(rand(4, 5))
+        end
+        X_mat = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
+        X = positive_definite(X_mat)
+        @test X == X
+        @test value(X) ≈ X_mat
+        @test isposdef(value(X))
+        @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
+        @test_throws ArgumentError positive_definite(rand(3, 3))
+        test_parameter_interface(X)
+
+        x, re = flatten(X)
+        Δl = first(
+            Zygote.gradient(x) do x
+                X = re(x)
+                return logdet(value(X))
+            end,
+        )
+        ΔL = first(
+            Zygote.gradient(vec_to_tril(X.L)) do L
+                return logdet(L * L')
+            end,
+        )
+        @test vec_to_tril(Δl) == tril(ΔL)
+        ChainRulesTestUtils.test_rrule(vec_to_tril, x)
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})

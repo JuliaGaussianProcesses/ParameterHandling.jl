@@ -189,3 +189,55 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
     return v, unflatten_Orthogonal
 end
+
+"""
+    positive_definite(X::StridedMatrix{<:Real})
+
+Produce a parameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
+be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix).
+
+The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
+"""
+function positive_definite(X::StridedMatrix{<:Real})
+    isposdef(X) || throw(ArgumentError("X is not positive-definite"))
+    return PositiveDefinite(tril_to_vec(cholesky(X).L))
+end
+
+struct PositiveDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
+    L::TL
+end
+
+Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L
+
+A_At(X) = X * X'
+
+value(X::PositiveDefinite) = A_At(vec_to_tril(X.L))
+
+function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
+    v, unflatten_v = flatten(T, X.L)
+    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(unflatten_v(v_new))
+    return v, unflatten_PositiveDefinite
+end
+
+# Convert a vector to lower-triangular matrix
+function vec_to_tril(v::AbstractVector{T}) where {T}
+    n_vec = length(v)
+    n_tril = Int((sqrt(1 + 8 * n_vec) - 1) / 2) # Infer the size of the matrix from the vector
+    L = zeros(T, n_tril, n_tril)
+    L[tril!(trues(size(L)))] = v
+    return L
+end
+
+function ChainRulesCore.rrule(::typeof(vec_to_tril), v::AbstractVector{T}) where {T}
+    L = vec_to_tril(v)
+    pullback_vec_to_tril(Δ) = NoTangent(), tril_to_vec(unthunk(Δ))
+    return L, pullback_vec_to_tril
+end
+
+# Convert a lower-triangular matrix to a vector (without the zeros)
+# Adapted from https://stackoverflow.com/questions/50651781/extract-lower-triangle-portion-of-a-matrix
+function tril_to_vec(X::AbstractMatrix{T}) where {T}
+    n, m = size(X)
+    n == m || error("Matrix needs to be square")
+    return X[tril!(trues(size(X)))]
+end
