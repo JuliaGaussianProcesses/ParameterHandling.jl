@@ -84,7 +84,7 @@ pdiagmat(args...) = PDiagMat(args...)
         @test X == X
         @test value(X) ≈ X_mat
         @test isposdef(value(X))
-        @test vec_to_tril(X.L) ≈ cholesky(A).L
+        @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
         @test_throws ArgumentError positive_definite(rand(3, 3))
         test_parameter_interface(X)
     end
