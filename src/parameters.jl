@@ -227,6 +227,12 @@ function vec_to_tril(v::AbstractVector{T}) where {T}
     return L
 end
 
+function ChainRulesCore.rrule(::typeof(vec_to_tril), v::AbstractVector{T}) where {T}
+    L = vec_to_tril(v)
+    pullback_vec_to_tril(Δ) = return (NoTangent(), tril_to_vec(Δ))
+    return L, pullback_vec_to_tril
+end
+
 # Convert a lower-triangular matrix to a vector (without the zeros)
 # Adapted from https://stackoverflow.com/questions/50651781/extract-lower-triangle-portion-of-a-matrix
 function tril_to_vec(X::AbstractMatrix{T}) where {T}

@@ -87,6 +87,17 @@ pdiagmat(args...) = PDiagMat(args...)
         @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
         @test_throws ArgumentError positive_definite(rand(3, 3))
         test_parameter_interface(X)
+
+        x, re = flatten(X)
+        Δl = first(Zygote.gradient(x) do x
+            X = re(x)
+            return logdet(value(X))
+        end)
+        ΔL = first(Zygote.gradient(vec_to_tril(X.L)) do L
+            logdet(L * L')
+        end)
+        @test vec_to_tril(Δl) == tril(ΔL)
+        ChainRulesTestUtils.test_rrule(vec_to_tril, x)
     end
 
     function objective_function(unflatten, flat_θ::Vector{<:Real})
