@@ -13,6 +13,12 @@
         test_flatten_interface(randn(10))
         test_flatten_interface(randn(5, 4))
         test_flatten_interface([randn(5) for _ in 1:3])
+
+        # Prevent regression of https://github.com/invenia/ParameterHandling.jl/issues/31
+        @testset for v in [[1, 2, 3], sparse([1, 0, 3])]
+            test_flatten_interface(v)
+            @test length(first(flatten(v))) == 0
+        end
     end
 
     @testset "SparseMatrixCSC" begin
