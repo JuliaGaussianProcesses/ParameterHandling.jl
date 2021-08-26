@@ -79,10 +79,10 @@ pdiagmat(args...) = PDiagMat(args...)
             @test vec_to_tril(tril_to_vec(X)) == X
             @test_throws ErrorException tril_to_vec(rand(4, 5))
         end
-        A = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
-        X = positive_definite(A)
+        X_mat = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
+        X = positive_definite(X_mat)
         @test X == X
-        @test value(X) ≈ A
+        @test value(X) ≈ X_mat
         @test isposdef(value(X))
         @test vec_to_tril(X.L) ≈ cholesky(A).L
         @test_throws ArgumentError positive_definite(rand(3, 3))
