@@ -175,6 +175,7 @@ Frobenius norm) and is overparametrised as a consequence.
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
 orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
+
 struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
     X::TX
 end
