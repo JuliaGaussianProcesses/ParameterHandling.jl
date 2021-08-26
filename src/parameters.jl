@@ -192,8 +192,8 @@ end
 """
     positive_definite(X::StridedMatrix{<:Real})
 
-Produce a prameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
-be a positive-definite matrix or a `Cholesky` object.
+Produce a parameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
+be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix).
 
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
