@@ -230,7 +230,7 @@ end
 
 function ChainRulesCore.rrule(::typeof(vec_to_tril), v::AbstractVector{T}) where {T}
     L = vec_to_tril(v)
-    pullback_vec_to_tril(Δ) = return (NoTangent(), tril_to_vec(Δ))
+    pullback_vec_to_tril(Δ) = NoTangent(), tril_to_vec(unthunk(Δ))
     return L, pullback_vec_to_tril
 end
 
