@@ -1,5 +1,6 @@
 using Bijectors
 using Compat: only
+using ChainRulesTestUtils
 using Distributions
 using LinearAlgebra
 using Optim

@@ -2,6 +2,7 @@ module ParameterHandling
 
 using Bijectors
 using Compat: only
+using ChainRulesCore
 using LinearAlgebra
 using SparseArrays
 
