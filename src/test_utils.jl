@@ -7,7 +7,7 @@ using Test
 using ParameterHandling: AbstractParameter, value
 
 # Handles equality of scalars, functions, tuples or arbitrary types
-function default_equality(a::T, b::T; kwargs...) where T
+function default_equality(a::T, b::T; kwargs...) where {T}
     vals = fieldvalues(a)
 
     # If we don't have any fields then we're probably dealing with scalars
@@ -22,17 +22,17 @@ end
 # Handles extracting elements from arrays.
 # Needed because fieldvalues(a) are empty, but we may need to recurse depending on
 # the element type
-function default_equality(a::T, b::T; kwargs...) where T<:AbstractArray
+function default_equality(a::T, b::T; kwargs...) where {T<:AbstractArray}
     return all(t -> default_equality(t...; kwargs...), zip(a, b))
 end
 
 # Handles extracting values for any dictionary types
-function default_equality(a::T, b::T; kwargs...) where T<:AbstractDict
+function default_equality(a::T, b::T; kwargs...) where {T<:AbstractDict}
     return all(t -> default_equality(t...; kwargs...), zip(values(a), values(b)))
 end
 
 # NOTE: May want to make the equality function a kwarg in the future.
-function test_flatten_interface(x::T; check_inferred::Bool=true) where T
+function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
     @testset "flatten($T)" begin
         # Checks default eltype still works and ensure that
         # basic functionality is implemented.
