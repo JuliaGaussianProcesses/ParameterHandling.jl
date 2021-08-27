@@ -11,7 +11,7 @@ using Zygote
 using SparseArrays
 
 using ParameterHandling: value
-using ParameterHandling.TestUtils: test_flatten_interface, test_parameter_interface
+using ParameterHandling.TestUtils: test_flatten_interface, test_value_flatten_interface, test_parameter_interface
 
 const tuple_infers = VERSION < v"1.5" ? false : true
 

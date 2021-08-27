@@ -78,6 +78,52 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where T
     return nothing
 end
 
+function test_value_flatten_interface(x::T; check_inferred::Bool=true) where T
+    @testset "value_flatten($T)" begin
+        # Checks default eltype still works and ensure that
+        # basic functionality is implemented.
+        v, unflatten = value_flatten(x)
+        @test typeof(v) === Vector{Float64}
+        @test default_equality(value(x), unflatten(v))
+        @test unflatten(v) isa T
+
+        # Check that everything infers properly.
+        check_inferred && @inferred value_flatten(x)
+
+        # Test with different precisions
+        @testset "Float64" begin
+            _v, _unflatten = value_flatten(Float64, x)
+            @test typeof(_v) === Vector{Float64}
+            @test _v == v
+            @test default_equality(value(x), unflatten(_v))
+            @test _unflatten(_v) isa T
+
+            # Check that everything infers properly.
+            check_inferred && @inferred value_flatten(Float64, x)
+        end
+        @testset "Float32" begin
+            _v, _unflatten = value_flatten(Float32, x)
+            @test typeof(_v) === Vector{Float32}
+            @test default_equality(value(x), _unflatten(_v); atol=1e-5)
+            @test _unflatten(_v) isa T
+
+            # Check that everything infers properly.
+            check_inferred && @inferred value_flatten(Float32, x)
+        end
+        @testset "Float16" begin
+            _v, _unflatten = value_flatten(Float16, x)
+            @test typeof(_v) === Vector{Float16}
+            @test default_equality(value(x), _unflatten(_v); atol=1e-2)
+            @test _unflatten(_v) isa T
+
+            # Check that everything infers properly.
+            check_inferred && @inferred value_flatten(Float16, x)
+        end
+    end
+
+    return nothing
+end
+
 function test_parameter_interface(x; check_inferred::Bool=true)
 
     # Parameters need to be flatten-able.

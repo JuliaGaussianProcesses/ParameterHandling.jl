@@ -102,3 +102,24 @@ _cumsum(x) = cumsum(x)
 if VERSION < v"1.5"
     _cumsum(x::Tuple) = (_cumsum(collect(x))..., )
 end
+
+"""
+    value_flatten([eltype=Float64], x)
+
+Operates similarly to `flatten`, but the returned `unflatten` function returns an object
+like `x`, but with unwrapped values.
+
+Doing
+```julia
+v, unflatten = value_flatten(x)
+```
+is the same as doing
+```julia
+v, _unflatten = flatten(x)
+unflatten = ParameterHandling.value ∘ _unflatten
+```
+"""
+function value_flatten(args...)
+    v, unflatten = flatten(args...)
+    return v, value ∘ unflatten
+end
