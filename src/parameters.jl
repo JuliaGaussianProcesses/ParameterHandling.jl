@@ -29,15 +29,15 @@ positive reals.
 Satisfies `val ≈ transform(unconstrained_value)`
 """
 function positive(
-    val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T)),
-) where T<:Real
+    val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T))
+) where {T<:Real}
     val > 0 || throw(ArgumentError("Value ($val) is not positive."))
     val > ε || throw(ArgumentError("Value ($val) is too small, relative to ε ($ε)."))
     unconstrained_value = inv(transform)(val - ε)
     return Positive(unconstrained_value, transform, convert(typeof(unconstrained_value), ε))
 end
 
-struct Positive{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
+struct Positive{T<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     transform::V
     ε::Tε
@@ -45,7 +45,7 @@ end
 
 value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 
-function flatten(::Type{T}, x::Positive) where T<:Real
+function flatten(::Type{T}, x::Positive) where {T<:Real}
     v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
     function unflatten_Positive(v_new::Vector{T})
@@ -70,9 +70,11 @@ function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     ε = convert(typeof(val), 1e-12)
 
     if val > upper_bound || val < lower_bound
-        throw(ArgumentError(
-            "Value, $val, outside of specified bounds ($lower_bound, $upper_bound).",
-        ))
+        throw(
+            ArgumentError(
+                "Value, $val, outside of specified bounds ($lower_bound, $upper_bound)."
+            ),
+        )
     end
 
     inv_transform = Bijectors.Logit(lb + ε, ub - ε)
@@ -82,7 +84,7 @@ function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     return Bounded(inv_transform(val), lb, ub, transform, ε)
 end
 
-struct Bounded{T<:Real, V<:Bijector, Tε<:Real} <: AbstractParameter
+struct Bounded{T<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     lower_bound::T
     upper_bound::T
@@ -92,12 +94,12 @@ end
 
 value(x::Bounded) = x.transform(x.unconstrained_value)
 
-function flatten(::Type{T}, x::Bounded) where T<:Real
+function flatten(::Type{T}, x::Bounded) where {T<:Real}
     v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
     function unflatten_Bounded(v_new::Vector{T})
         return Bounded(
-            unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε,
+            unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε
         )
     end
 
@@ -119,7 +121,7 @@ end
 
 value(x::Fixed) = x.value
 
-function flatten(::Type{T}, x::Fixed) where T<:Real
+function flatten(::Type{T}, x::Fixed) where {T<:Real}
     unflatten_Fixed(v_new::Vector{T}) = x
     return T[], unflatten_Fixed
 end
@@ -135,7 +137,7 @@ It can be helpful to use `deferred` recursively when constructing complicated ob
 """
 deferred(f, args...) = Deferred(f, args)
 
-struct Deferred{Tf, Targs} <: AbstractParameter
+struct Deferred{Tf,Targs} <: AbstractParameter
     f::Tf
     args::Targs
 end
@@ -144,7 +146,7 @@ Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
 
 value(x::Deferred) = x.f(value(x.args)...)
 
-function flatten(::Type{T}, x::Deferred) where T<:Real
+function flatten(::Type{T}, x::Deferred) where {T<:Real}
     v, unflatten = flatten(T, x.args)
     unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
@@ -157,7 +159,7 @@ Project `X` onto the closest orthogonal matrix in Frobenius norm.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-@inline function nearest_orthogonal_matrix(X::StridedMatrix{<:Union{Real, Complex}})
+@inline function nearest_orthogonal_matrix(X::StridedMatrix{<:Union{Real,Complex}})
     # Inlining necessary for type inference for some reason.
     U, _, V = svd(X)
     return U * V'
