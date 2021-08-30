@@ -168,4 +168,12 @@ pdiagmat(args...) = PDiagMat(args...)
         # Check that it's successfully optimised.
         @test mean(value(unflatten(results.minimizer))) ≈ 0 atol=1e-7
     end
+
+    @testset "value_flatten" begin
+        x = (ones(3), fixed(5.0), (a=fixed(5.0), b=[6.0, 2.1]))
+        v, unflatten = value_flatten(x)
+
+        @test length(v) == 5
+        @test unflatten(v) == ParameterHandling.value(x)
+    end
 end
