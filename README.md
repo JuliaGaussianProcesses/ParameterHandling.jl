@@ -163,6 +163,15 @@ julia> value(unflatten(new_v)) # Obtain constrained value.
 3.071174489325673
 ```
 
+We also provide the utility function `value_flatten` which returns un unflattening function
+equivalent to `value(unflatten(v))`. The above could then be implemented as
+```julia
+julia> v, unflatten = value_flatten(x);
+
+julia> unflatten(x)
+1.0
+```
+
 It is straightforward to implement your own parameters that interoperate with those already
 written by implementing `value` and `flatten` for them. You might want to do this if this
 package doesn't currently support the functionality that you need.
@@ -209,18 +218,14 @@ raw_initial_params = (
     noise_var=positive(0.2),
 )
 
-# Using ParameterHandling.flatten, we can obtain both a Vector{Float64} representation of
-# these parameters, and a mapping from that vector back to the original parameters:
-flat_initial_params, unflatten = ParameterHandling.flatten(raw_initial_params)
+# Using ParameterHandling.value_flatten, we can obtain both a Vector{Float64} representation of
+# these parameters, and a mapping from that vector back to the original parameter values:
+flat_initial_params, unflatten = ParameterHandling.value_flatten(raw_initial_params)
 
 # ParameterHandling.value strips out all of the Positive types in initial_params,
 # returning a plain named tuple of named tuples and Float64s.
 julia> initial_params = ParameterHandling.value(raw_initial_params)
 (k1 = (var = 0.9, precision = 1.0), k2 = (var = 0.10000000000000002, precision = 0.30000000000000004), noise_var = 0.19999999999999998)
-
-# We define unpack to map directly from the flat Vector{Float64} representation to a
-# the NamedTuple representation with all the Positive types removed.
-unpack = ParameterHandling.value ∘ unflatten
 
 # GP-specific functionality. Don't worry about the details, just
 # note the use of the structured representation of the parameters.
@@ -243,13 +248,13 @@ end
 
 # Use Optim.jl to minimise the objective function w.r.t. the params.
 # The important thing here is to note that we're passing in the flat vector of parameters to
-# Optim, which is something that Optim knows how to work with, and using `unpack` to convert
+# Optim, which is something that Optim knows how to work with, and using `unflatten` to convert
 # from this representation to the structured one that our objective function knows about
-# using `unpack` -- we've used ParameterHandling to build a bridge between Optim and an
+# using `unflatten` -- we've used ParameterHandling to build a bridge between Optim and an
 # entirely unrelated package.
 training_results = Optim.optimize(
-    objective ∘ unpack,
-    θ -> only(Zygote.gradient(objective ∘ unpack, θ)),
+    objective ∘ unflatten,
+    θ -> only(Zygote.gradient(objective ∘ unflatten, θ)),
     flat_initial_params,
     BFGS(
         alphaguess = Optim.LineSearches.InitialStatic(scaled=true),
@@ -260,7 +265,7 @@ training_results = Optim.optimize(
 )
 
 # Extracting the final values of the parameters.
-final_params = unpack(training_results.minimizer)
+final_params = unflatten(training_results.minimizer)
 f_trained = build_gp(final_params)
 ```
 
