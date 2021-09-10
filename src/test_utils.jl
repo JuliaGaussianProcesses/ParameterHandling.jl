@@ -7,7 +7,7 @@ using Test
 using ParameterHandling: AbstractParameter, value
 
 # Handles equality of structs / mutable structs.
-function default_equality(a::Ta, b::Tb; kwargs...) where {Ta, Tb}
+function default_equality(a::Ta, b::Tb; kwargs...) where {Ta,Tb}
     (isstructtype(Ta) && isstructtype(Tb)) || throw(error("Arguments aren't structs"))
     return all(t -> default_equality(t...; kwargs...), zip(fieldvalues(a), fieldvalues(b)))
 end

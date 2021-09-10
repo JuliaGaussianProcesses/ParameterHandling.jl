@@ -86,7 +86,7 @@ function flatten(::Type{T}, x::Tuple) where {T<:Real}
     return reduce(vcat, x_vecs), unflatten_to_Tuple
 end
 
-function flatten(::Type{T}, x::NamedTuple{names}) where {T<:Real, names}
+function flatten(::Type{T}, x::NamedTuple{names}) where {T<:Real,names}
     x_vec, unflatten = flatten(T, values(x))
     function unflatten_to_NamedTuple(v::AbstractVector{<:Real})
         v_vec_vec = unflatten(v)

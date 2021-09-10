@@ -84,7 +84,7 @@ function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     return Bounded(inv_transform(val), lb, ub, transform, ε)
 end
 
-struct Bounded{T<:Real,Tbound<:Real, V<:Bijector,Tε<:Real} <: AbstractParameter
+struct Bounded{T<:Real,Tbound<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     lower_bound::Tbound
     upper_bound::Tbound
