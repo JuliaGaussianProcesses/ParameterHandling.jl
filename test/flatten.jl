@@ -26,7 +26,6 @@
 
     @testset "Tuple" begin
         test_flatten_interface((1.0, 2.0); check_inferred=tuple_infers)
-
         test_flatten_interface((1.0, (2.0, 3.0), randn(5)); check_inferred=tuple_infers)
     end
 

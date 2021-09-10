@@ -48,7 +48,7 @@ value(x::Positive) = x.transform(x.unconstrained_value) + x.ε
 function flatten(::Type{T}, x::Positive) where {T<:Real}
     v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
-    function unflatten_Positive(v_new::Vector{T})
+    function unflatten_Positive(v_new::AbstractVector{<:Real})
         return Positive(unflatten_to_Real(v_new), x.transform, x.ε)
     end
 
@@ -84,10 +84,10 @@ function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     return Bounded(inv_transform(val), lb, ub, transform, ε)
 end
 
-struct Bounded{T<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
+struct Bounded{T<:Real,Tbound<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
-    lower_bound::T
-    upper_bound::T
+    lower_bound::Tbound
+    upper_bound::Tbound
     transform::V
     ε::Tε
 end
@@ -97,7 +97,7 @@ value(x::Bounded) = x.transform(x.unconstrained_value)
 function flatten(::Type{T}, x::Bounded) where {T<:Real}
     v, unflatten_to_Real = flatten(T, x.unconstrained_value)
 
-    function unflatten_Bounded(v_new::Vector{T})
+    function unflatten_Bounded(v_new::AbstractVector{<:Real})
         return Bounded(
             unflatten_to_Real(v_new), x.lower_bound, x.upper_bound, x.transform, x.ε
         )
@@ -122,7 +122,7 @@ end
 value(x::Fixed) = x.value
 
 function flatten(::Type{T}, x::Fixed) where {T<:Real}
-    unflatten_Fixed(v_new::Vector{T}) = x
+    unflatten_Fixed(v_new::AbstractVector{<:Real}) = x
     return T[], unflatten_Fixed
 end
 
@@ -148,7 +148,7 @@ value(x::Deferred) = x.f(value(x.args)...)
 
 function flatten(::Type{T}, x::Deferred) where {T<:Real}
     v, unflatten = flatten(T, x.args)
-    unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
+    unflatten_Deferred(v_new::AbstractVector{<:Real}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end
 
@@ -188,7 +188,9 @@ value(X::Orthogonal) = nearest_orthogonal_matrix(X.X)
 
 function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
     v, unflatten_to_Array = flatten(T, X.X)
-    unflatten_Orthogonal(v_new::Vector{T}) = Orthogonal(unflatten_to_Array(v_new))
+    function unflatten_Orthogonal(v_new::AbstractVector{<:Real})
+        return Orthogonal(unflatten_to_Array(v_new))
+    end
     return v, unflatten_Orthogonal
 end
 
@@ -217,7 +219,9 @@ value(X::PositiveDefinite) = A_At(vec_to_tril(X.L))
 
 function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
     v, unflatten_v = flatten(T, X.L)
-    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(unflatten_v(v_new))
+    function unflatten_PositiveDefinite(v_new::AbstractVector{<:Real})
+        return PositiveDefinite(unflatten_v(v_new))
+    end
     return v, unflatten_PositiveDefinite
 end
 
