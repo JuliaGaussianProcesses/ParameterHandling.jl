@@ -6,29 +6,28 @@ using Test
 
 using ParameterHandling: AbstractParameter, value
 
-# Handles equality of scalars, functions, tuples or arbitrary types
-function default_equality(a::T, b::T; kwargs...) where {T}
-    vals = fieldvalues(a)
-
-    # If we don't have any fields then we're probably dealing with scalars
-    if isempty(vals)
-        # Only call isapprox for numbers, otherwise we fallback to ==
-        return T <: Number ? isapprox(a, b; kwargs...) : a == b
-    else
-        return all(t -> default_equality(t...; kwargs...), zip(vals, fieldvalues(b)))
-    end
+# Handles equality of structs / mutable structs.
+function default_equality(a::Ta, b::Tb; kwargs...) where {Ta, Tb}
+    (isstructtype(Ta) && isstructtype(Tb)) || throw(error("Arguments aren't structs"))
+    return all(t -> default_equality(t...; kwargs...), zip(fieldvalues(a), fieldvalues(b)))
 end
+
+default_equality(a::Number, b::Number; kwargs...) = isapprox(a, b; kwargs...)
 
 # Handles extracting elements from arrays.
 # Needed because fieldvalues(a) are empty, but we may need to recurse depending on
 # the element type
-function default_equality(a::T, b::T; kwargs...) where {T<:AbstractArray}
+function default_equality(a::AbstractArray, b::AbstractArray; kwargs...)
     return all(t -> default_equality(t...; kwargs...), zip(a, b))
 end
 
 # Handles extracting values for any dictionary types
-function default_equality(a::T, b::T; kwargs...) where {T<:AbstractDict}
+function default_equality(a::AbstractDict, b::AbstractDict; kwargs...)
     return all(t -> default_equality(t...; kwargs...), zip(values(a), values(b)))
+end
+
+struct MyReal{T} <: Real
+    v::T
 end
 
 # NOTE: May want to make the equality function a kwarg in the future.
@@ -50,7 +49,9 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
             @test typeof(_v) === Vector{Float64}
             @test _v == v
             @test default_equality(x, unflatten(_v))
-            @test _unflatten(_v) isa T
+
+            # Check that unflattening works with different reals.
+            _unflatten(map(MyReal, randn(length(_v))))
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float64, x)
@@ -59,7 +60,9 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
             _v, _unflatten = flatten(Float32, x)
             @test typeof(_v) === Vector{Float32}
             @test default_equality(x, _unflatten(_v); atol=1e-5)
-            @test _unflatten(_v) isa T
+
+            # Check that unflattening works with different precisions.
+            _unflatten(map(MyReal, randn(length(_v))))
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float32, x)
@@ -68,7 +71,9 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
             _v, _unflatten = flatten(Float16, x)
             @test typeof(_v) === Vector{Float16}
             @test default_equality(x, _unflatten(_v); atol=1e-2)
-            @test _unflatten(_v) isa T
+
+            # Check that unflattening works with different precisions.
+            _unflatten(map(MyReal, randn(length(_v))))
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float16, x)
