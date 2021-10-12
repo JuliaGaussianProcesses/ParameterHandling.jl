@@ -1,8 +1,9 @@
 module ParameterHandling
 
-using Bijectors
 using Compat: only
 using ChainRulesCore
+using InverseFunctions: inverse
+using LogExpFunctions: logit, logistic
 using LinearAlgebra
 using SparseArrays
 

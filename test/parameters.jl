@@ -16,7 +16,7 @@ pdiagmat(args...) = PDiagMat(args...)
         # Test edge cases around the size of the value relative to the error tol.
         @test_throws ArgumentError positive(-0.1)
         @test_throws ArgumentError positive(1e-11)
-        @test value(positive(1e-11, Bijectors.Exp(), 1e-12)) ≈ 1e-11
+        @test value(positive(1e-11, exp, 1e-12)) ≈ 1e-11
     end
 
     @testset "bounded" begin

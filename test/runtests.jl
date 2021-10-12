@@ -1,4 +1,3 @@
-using Bijectors
 using Compat: only
 using ChainRulesTestUtils
 using Distributions

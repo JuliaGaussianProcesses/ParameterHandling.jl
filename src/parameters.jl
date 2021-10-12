@@ -20,7 +20,7 @@ value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
 """
-    positive(val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T))) where T<:Real
+    positive(val::Real, transform=exp, ε=sqrt(eps(typeof(value))))
 
 Returns a `Postive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
@@ -28,16 +28,14 @@ This is represented in terms of an a `transform` that maps an `unconstrained_val
 positive reals.
 Satisfies `val ≈ transform(unconstrained_value)`
 """
-function positive(
-    val::T, transform::Bijector=Bijectors.Exp(), ε=sqrt(eps(T))
-) where {T<:Real}
+function positive(val::Real, transform=exp, ε=sqrt(eps(typeof(val))))
     val > 0 || throw(ArgumentError("Value ($val) is not positive."))
     val > ε || throw(ArgumentError("Value ($val) is too small, relative to ε ($ε)."))
-    unconstrained_value = inv(transform)(val - ε)
+    unconstrained_value = inverse(transform)(val - ε)
     return Positive(unconstrained_value, transform, convert(typeof(unconstrained_value), ε))
 end
 
-struct Positive{T<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
+struct Positive{T<:Real,V,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     transform::V
     ε::Tε
@@ -62,14 +60,18 @@ Constructs a `Bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`), and is equal to `val`.
 This is represented internally in terms of an `unconstrained_value` and a `transform` that
-maps any real to this interval. `unconstrained_value` is `inv(transform)(val)`.
+maps any real to this interval.
 """
 function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     lb = convert(typeof(val), lower_bound)
     ub = convert(typeof(val), upper_bound)
-    ε = convert(typeof(val), 1e-12)
 
-    if val > upper_bound || val < lower_bound
+    # construct open interval
+    ε = convert(typeof(val), 1e-12)
+    lb_plus_ε = lb + ε
+    ub_minus_ε = ub - ε
+
+    if val > ub_minus_ε || val < lb_plus_ε
         throw(
             ArgumentError(
                 "Value, $val, outside of specified bounds ($lower_bound, $upper_bound)."
@@ -77,14 +79,14 @@ function bounded(val::Real, lower_bound::Real, upper_bound::Real)
         )
     end
 
-    inv_transform = Bijectors.Logit(lb + ε, ub - ε)
-    transform = inv(inv_transform)
+    length_interval = ub_minus_ε - lb_plus_ε
+    unconstrained_val = logit((val - lb_plus_ε) / length_interval)
+    transform(x) = lb_plus_ε + length_interval * logistic(x)
 
-    # Bijectors defines only Logit struct so we use Logistic as the inverse of Logit
-    return Bounded(inv_transform(val), lb, ub, transform, ε)
+    return Bounded(unconstrained_val, lb, ub, transform, ε)
 end
 
-struct Bounded{T<:Real,V<:Bijector,Tε<:Real} <: AbstractParameter
+struct Bounded{T<:Real,V,Tε<:Real} <: AbstractParameter
     unconstrained_value::T
     lower_bound::T
     upper_bound::T
