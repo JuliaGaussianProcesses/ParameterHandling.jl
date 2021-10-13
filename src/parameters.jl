@@ -20,7 +20,7 @@ value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
 
 """
-    positive(val::Real, transform=exp, ε=sqrt(eps(typeof(value))))
+    positive(val::Real, transform=exp, ε=sqrt(eps(typeof(val))))
 
 Returns a `Postive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
