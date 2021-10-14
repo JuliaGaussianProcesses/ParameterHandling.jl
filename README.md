@@ -138,37 +138,37 @@ _unconstrained_ number, rather than the value represented by the `Positive` obje
 example
 
 ```julia
-julia> using ParameterHandling: value, Positive
+julia> using ParameterHandling
 
-julia> x_unconstrained = log(1.0) # Specify unconstrained value.
-0.0
+julia> x_constrained = 1.0 # Specify constrained value.
+1.0
 
-julia> x = Positive(x_unconstrained) # Construct a number that should remain positive.
-Positive{Float64,Bijectors.Exp{0}}(0.0, Bijectors.Exp{0}())
+julia> x = positive(x_constrained) # Construct a number that should remain positive.
+ParameterHandling.Positive{Float64, typeof(exp), Float64}(-1.490116130486996e-8, exp, 1.4901161193847656e-8)
 
-julia> value(x) # Get the constrained value by applying the transform.
+julia> ParameterHandling.value(x) # Get the constrained value by applying the transform.
 1.0
 
 julia> v, unflatten = flatten(x); # Supports the `flatten` interface.
 
 julia> v
-1-element Array{Float64,1}:
- 0.0
+1-element Vector{Float64}:
+ -1.490116130486996e-8
 
 julia> new_v = randn(1) # Pick a random new value.
-1-element Array{Float64,1}:
- 1.1220600582508566
+1-element Vector{Float64}:
+ 2.3482666974328716
 
-julia> value(unflatten(new_v)) # Obtain constrained value.
-3.071174489325673
+julia> ParameterHandling.value(unflatten(new_v)) # Obtain constrained value.
+10.467410816707215
 ```
 
-We also provide the utility function `value_flatten` which returns un unflattening function
+We also provide the utility function `value_flatten` which returns an unflattening function
 equivalent to `value(unflatten(v))`. The above could then be implemented as
 ```julia
 julia> v, unflatten = value_flatten(x);
 
-julia> unflatten(x)
+julia> unflatten(v)
 1.0
 ```
 
