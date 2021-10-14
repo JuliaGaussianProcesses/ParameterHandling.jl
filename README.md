@@ -146,7 +146,7 @@ julia> x_constrained = 1.0 # Specify constrained value.
 julia> x = positive(x_constrained) # Construct a number that should remain positive.
 ParameterHandling.Positive{Float64, typeof(exp), Float64}(-1.490116130486996e-8, exp, 1.4901161193847656e-8)
 
-julia> value(x) # Get the constrained value by applying the transform.
+julia> ParameterHandling.value(x) # Get the constrained value by applying the transform.
 1.0
 
 julia> v, unflatten = flatten(x); # Supports the `flatten` interface.
@@ -159,7 +159,7 @@ julia> new_v = randn(1) # Pick a random new value.
 1-element Vector{Float64}:
  2.3482666974328716
 
-julia> value(unflatten(new_v)) # Obtain constrained value.
+julia> ParameterHandling.value(unflatten(new_v)) # Obtain constrained value.
 10.467410816707215
 ```
 
