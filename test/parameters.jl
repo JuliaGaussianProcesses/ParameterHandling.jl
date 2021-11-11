@@ -30,10 +30,20 @@ pdiagmat(args...) = PDiagMat(args...)
     end
 
     @testset "fixed" begin
-        val = (a=5.0, b=4.0)
-        p = fixed(val)
-        test_parameter_interface(p)
-        @test value(p) == val
+        @testset "plain" begin
+            val = (a=5.0, b=4.0)
+            p = fixed(val)
+            test_parameter_interface(p)
+            @test value(p) == val
+        end
+
+        @testset "constrained" begin
+            val = 1.234
+            constrained_val = positive(val)
+            p = fixed(constrained_val)
+            test_parameter_interface(p)
+            @test value(p) ≈ val
+        end
     end
 
     @testset "deferred" begin
