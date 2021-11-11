@@ -148,9 +148,9 @@ Base.:(==)(a::Deferred, b::Deferred) = (a.f == b.f) && (a.args == b.args)
 
 value(x::Deferred) = x.f(value(x.args)...)
 
-function flatten(::Type{T}, x::D) where {T<:Real, D<:Deferred}
+function flatten(::Type{T}, x::Deferred) where {T<:Real}
     v, unflatten = flatten(T, x.args)
-    unflatten_Deferred(v_new::Vector{T}) = D(x.f, unflatten(v_new))
+    unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end
 
