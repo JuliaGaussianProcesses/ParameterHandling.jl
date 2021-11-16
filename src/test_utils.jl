@@ -43,6 +43,7 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
 
         # Check that everything infers properly.
         check_inferred && @inferred flatten(x)
+        check_inferred && @inferred unflatten(v)
 
         # Test with different precisions
         @testset "Float64" begin
@@ -54,6 +55,7 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float64, x)
+            check_inferred && @inferred _unflatten(_v)
         end
         @testset "Float32" begin
             _v, _unflatten = flatten(Float32, x)
@@ -63,6 +65,7 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float32, x)
+            check_inferred && @inferred _unflatten(_v)
         end
         @testset "Float16" begin
             _v, _unflatten = flatten(Float16, x)
@@ -72,6 +75,7 @@ function test_flatten_interface(x::T; check_inferred::Bool=true) where {T}
 
             # Check that everything infers properly.
             check_inferred && @inferred flatten(Float16, x)
+            check_inferred && @inferred _unflatten(_v)
         end
     end
 
