@@ -150,7 +150,7 @@ value(x::Deferred) = x.f(value(x.args)...)
 
 function flatten(::Type{T}, x::Deferred) where {T<:Real}
     v, unflatten = flatten(T, x.args)
-    unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
+    @inline unflatten_Deferred(v_new::Vector{T}) = Deferred(x.f, unflatten(v_new))
     return v, unflatten_Deferred
 end
 
