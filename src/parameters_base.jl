@@ -7,7 +7,7 @@ Return the "value" of an object.
 For `AbstractParameter`s this typically applies some transformation to some data
 contained in the parameter, and returns a plain data type.
 It might, for example, return a transformation of some internal data, the result of which
-is guaranteed to satisfy some contraint.
+is guaranteed to satisfy some constraint.
 """
 value(x)
 

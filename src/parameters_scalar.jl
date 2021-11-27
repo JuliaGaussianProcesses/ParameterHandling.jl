@@ -1,11 +1,11 @@
 """
     positive(val::Real, transform=exp, ε=sqrt(eps(typeof(val))))
 
-Returns a `Postive`.
+Return a `Positive`.
 The `value` of a `Positive` is a `Real` number that is constrained to be positive.
-This is represented in terms of an a `transform` that maps an `unconstrained_value` to the
+This is represented in terms of a `transform` that maps an `unconstrained_value` to the
 positive reals.
-Satisfies `val ≈ transform(unconstrained_value)`
+Satisfies `val ≈ transform(unconstrained_value)`.
 """
 function positive(val::Real, transform=exp, ε=sqrt(eps(typeof(val))))
     val > 0 || throw(ArgumentError("Value ($val) is not positive."))
@@ -39,7 +39,7 @@ Constructs a `Bounded`.
 The `value` of a `Bounded` is a `Real` number that is constrained to be within the interval
 (`lower_bound`, `upper_bound`), and is equal to `val`.
 This is represented internally in terms of an `unconstrained_value` and a `transform` that
-maps any real to this interval.
+maps any `Real` to this interval.
 """
 function bounded(val::Real, lower_bound::Real, upper_bound::Real)
     lb = convert(typeof(val), lower_bound)

@@ -11,7 +11,7 @@ struct Fixed{T} <: AbstractParameter
     value::T
 end
 
-value(x::Fixed) = x.value
+value(x::Fixed) = value(x.value)
 
 function flatten(::Type{T}, x::Fixed) where {T<:Real}
     unflatten_Fixed(v_new::Vector{T}) = x
