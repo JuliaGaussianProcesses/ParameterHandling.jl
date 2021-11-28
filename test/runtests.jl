@@ -17,4 +17,7 @@ const tuple_infers = VERSION < v"1.5" ? false : true
 @testset "ParameterHandling.jl" begin
     include("flatten.jl")
     include("parameters.jl")
+    include("parameters_meta.jl")
+    include("parameters_scalar.jl")
+    include("parameters_matrix.jl")
 end
