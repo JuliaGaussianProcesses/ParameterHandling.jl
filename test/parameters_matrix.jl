@@ -1,5 +1,10 @@
 using ParameterHandling: vec_to_tril, tril_to_vec
 
+function test_matrix_parameter_interface(X)
+    test_parameter_interface(X)
+    @test value(X) isa typeof(X)
+end
+
 @testset "parameters_matrix.jl" begin
     @testset "orthogonal" begin
         is_almost_orthogonal(X::AbstractMatrix, tol) = norm(X'X - I) < tol
@@ -53,5 +58,16 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         )
         @test vec_to_tril(Δl) == tril(ΔL)
         ChainRulesTestUtils.test_rrule(vec_to_tril, x)
+    end
+
+    @testset "other structured matrices" begin
+        test_matrix_parameter_interface(Diagonal(randn(2)))
+        test_matrix_parameter_interface(Diagonal(fill(Foo(), 2)))
+        test_matrix_parameter_interface(SMatrix{2, 2}(randn(2, 2)))
+        test_matrix_parameter_interface(SMatrix{2, 2}(fill(Foo(), 2, 2)))
+        test_matrix_parameter_interface(sprand(10, 10, 0.5))
+        test_matrix_parameter_interface(sparse([1, 2, 3], [1, 2, 3], fill(Foo(), 3)))
+        test_matrix_parameter_interface(Symmetric(randn(2, 2)))
+        test_matrix_parameter_interface(Symmetric(fill(Foo(), 2, 2)))
     end
 end

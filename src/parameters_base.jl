@@ -32,3 +32,5 @@ value(x::Array) = map(value, x)
 value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
+
+value(x::Char) = x

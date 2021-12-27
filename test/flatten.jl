@@ -20,6 +20,10 @@
         end
     end
 
+    @testset "SArray" begin
+        test_flatten_interface(SMatrix{2, 2}(randn(2, 2)))
+    end
+
     @testset "SparseMatrixCSC" begin
         test_flatten_interface(sprand(10, 10, 0.5))
     end

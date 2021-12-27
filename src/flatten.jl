@@ -63,10 +63,22 @@ function flatten(::Type{T}, x::AbstractArray) where {T<:Real}
     return x_vec, Array_from_vec
 end
 
+function flatten(::Type{T}, x::Diagonal) where {T<:Real}
+    x_vec, from_vec = flatten(T, x.diag)
+    Diagonal_from_vec(x_vec) = Diagonal(from_vec(x_vec))
+    return x_vec, Diagonal_from_vec
+end
+
 function flatten(::Type{T}, x::SparseMatrixCSC) where {T<:Real}
     x_vec, from_vec = flatten(T, x.nzval)
     Array_from_vec(x_vec) = SparseMatrixCSC(x.m, x.n, x.colptr, x.rowval, from_vec(x_vec))
     return x_vec, Array_from_vec
+end
+
+function flatten(::Type{T}, x::Symmetric) where {T<:Real}
+    x_vec, from_vec = flatten(T, x.data)
+    Symmetric_from_vec(x_vec) = Symmetric(from_vec(x_vec), Symbol(x.uplo))
+    return x_vec, Symmetric_from_vec
 end
 
 function flatten(::Type{T}, x::Tuple) where {T<:Real}
