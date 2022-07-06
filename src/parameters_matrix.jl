@@ -5,7 +5,7 @@ Project `X` onto the closest orthogonal matrix in Frobenius norm.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-@inline function nearest_orthogonal_matrix(X::StridedMatrix{<:Union{Real,Complex}})
+@inline function nearest_orthogonal_matrix(X::AbstractMatrix{<:Union{Real,Complex}})
     # Inlining necessary for type inference for some reason.
     U, _, V = svd(X)
     return U * V'
@@ -22,9 +22,9 @@ Frobenius norm) and is overparametrised as a consequence.
 
 Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.py#L446
 """
-orthogonal(X::StridedMatrix{<:Real}) = Orthogonal(X)
+orthogonal(X::AbstractMatrix{<:Real}) = Orthogonal(X)
 
-struct Orthogonal{TX<:StridedMatrix{<:Real}} <: AbstractParameter
+struct Orthogonal{TX<:AbstractMatrix{<:Real}} <: AbstractParameter
     X::TX
 end
 
@@ -46,7 +46,7 @@ be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix
 
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
-function positive_definite(X::StridedMatrix{<:Real})
+function positive_definite(X::AbstractMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
     return PositiveDefinite(tril_to_vec(cholesky(X).L))
 end
