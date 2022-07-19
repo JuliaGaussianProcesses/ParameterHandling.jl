@@ -1,5 +1,5 @@
 """
-    nearest_orthogonal_matrix(X::StridedMatrix)
+    nearest_orthogonal_matrix(X::AbstractMatrix{<:Union{Real,Complex}})
 
 Project `X` onto the closest orthogonal matrix in Frobenius norm.
 
@@ -12,7 +12,7 @@ Originally used in varz: https://github.com/wesselb/varz/blob/master/varz/vars.p
 end
 
 """
-    orthogonal(X::StridedMatrix{<:Real})
+    orthogonal(X::AbstractMatrix{<:Real})
 
 Produce a parameter whose `value` is constrained to be an orthogonal matrix. The argument `X` need not
 be orthogonal.
@@ -39,7 +39,7 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
 end
 
 """
-    positive_definite(X::StridedMatrix{<:Real})
+    positive_definite(X::AbstractMatrix{<:Real})
 
 Produce a parameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
 be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix).
