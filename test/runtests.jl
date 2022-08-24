@@ -20,4 +20,5 @@ const tuple_infers = VERSION < v"1.5" ? false : true
     include("parameters_meta.jl")
     include("parameters_scalar.jl")
     include("parameters_matrix.jl")
+    include("parameters_array.jl")
 end
