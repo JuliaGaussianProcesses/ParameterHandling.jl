@@ -4,10 +4,10 @@ struct PositiveArray{T<:Array{<:Real},V,Tε<:Real} <: AbstractParameter
     ε::Tε
 end
 
-ParameterHandling.value(x::PositiveArray) = map(exp, x.x) .+ 1e-4
+value(x::PositiveArray) = map(exp, x.unconstrained_value) .+ x.ε
 
-function ParameterHandling.flatten(::Type{T}, x::PositiveArray{<:Array{T}}) where {T<:Real}
-    v, unflatten_to_array = flatten(x.unconstrained_value)
+function flatten(::Type{T}, x::PositiveArray{<:Array{V}}) where {T<:Real, V<:Real}
+    v, unflatten_to_array = flatten(T, x.unconstrained_value)
     transform = x.transform
     ε = x.ε
     function unflatten_PositiveArray(v::AbstractVector{T})
