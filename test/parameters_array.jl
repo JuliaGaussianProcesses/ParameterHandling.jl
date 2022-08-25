@@ -12,8 +12,12 @@
         @test_throws ArgumentError positive(fill(1e-12, 1, 2, 3))
         @test value(positive(fill(1e-11, 3, 2, 1), exp, 1e-12)) ≈ fill(1e-11, 3, 2, 1)
 
-        # Set a very loose bound on allocations, but one which is clearly sub-linear in
-        # the size of `x`.
+        # These tests assume that if the number of allocations is roughly constant in the
+        # size of `x`, then performance is acceptable. This is demonstrated by requiring
+        # that the number of allocations (100) is a lot smaller than the total length of
+        # the array in question (1_000_000). The bound (100) is quite loose because there
+        # are typically serveral 10s of allocations made by Zygote for book-keeping
+        # purposes etc.
         @testset "zygote performance" begin
             x = rand(1000, 1000) .+ 0.1
             flat_x, unflatten = value_flatten(positive(x))
@@ -33,7 +37,11 @@
         end
 
         # Check that this optimisation is actually necessary -- i.e. that the performance
-        # of the equivalent operation, `map(positive, x)` interacts poorly with AD.
+        # of the equivalent operation, `map(positive, x)`, is indeed poor, esp. with AD.
+        # Poor performance is demonstrated by showing that there's at least one allocation
+        # per element. A smaller array than the previous test set is used because it can
+        # be _really_ slow for large arrays (several seconds), which is undesirable in
+        # unit tests.
         @testset "zygote performance of scalar equivalent" begin
             x = rand(1000) .+ 0.1
             flat_x, unflatten = value_flatten(map(positive, x))
