@@ -276,7 +276,8 @@ In particular, we've seen an example of how ParameterHandling.jl can be used to 
 gap between the "flat" representation of parameters that `Optim` likes to work with, and the
 "structured" representation that it's convenient to write optimisation algorithms with.
 
-# Gotchas
+# Gotchas and Performance Tips
 
 1. `Integer`s typically don't take part in the kind of optimisation procedures that this package is designed to handle. Consequently, `flatten(::Integer)` produces an empty vector.
 2. `deferred` has some type-stability issues when used in conjunction with abstract types. For example, `flatten(deferred(Normal, 5.0, 4.0))` won't infer properly. A simple work around is to write a function `normal(args...) = Normal(args...)` and work with `deferred(normal, 5.0, 4.0)` instead.
+3. Let `x` be an `Array{<:Real}`. If you wish to constrain each of its values to be positive, prefer `positive(x)` over `map(positive, x)` or `positive.(x)`. `positive(x)` has been implemented the associated `unflatten` function has good performance, particularly when interacting with `Zygote` (when `map(positive, x)` is extremely slow).
