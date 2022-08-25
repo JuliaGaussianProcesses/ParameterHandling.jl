@@ -70,16 +70,16 @@
 
             # primal evaluation
             count_allocs(unflatten, flat_x)
-            @test count_allocs(unflatten, flat_x) < 100
+            @test count_allocs(unflatten, flat_x) < 300
 
             # forward evaluation
             count_allocs(Zygote.pullback, unflatten, flat_x)
-            @test count_allocs(Zygote.pullback, unflatten, flat_x) < 100
+            @test count_allocs(Zygote.pullback, unflatten, flat_x) < 300
 
             # pullback
             out, pb = Zygote.pullback(unflatten, flat_x)
             count_allocs(pb, out)
-            @test count_allocs(pb, out) < 100
+            @test count_allocs(pb, out) < 300
         end
 
         # Same style of performance test as for `map(positive, x)`. See above for info.
