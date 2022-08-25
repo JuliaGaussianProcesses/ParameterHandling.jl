@@ -6,7 +6,7 @@ end
 
 value(x::PositiveArray) = map(exp, x.unconstrained_value) .+ x.ε
 
-function flatten(::Type{T}, x::PositiveArray{<:Array{V}}) where {T<:Real, V<:Real}
+function flatten(::Type{T}, x::PositiveArray{<:Array{V}}) where {T<:Real,V<:Real}
     v, unflatten_to_array = flatten(T, x.unconstrained_value)
     transform = x.transform
     ε = x.ε
