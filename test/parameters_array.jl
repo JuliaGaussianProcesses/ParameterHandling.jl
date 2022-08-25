@@ -51,4 +51,45 @@
             count_allocs(Zygote.pullback, unflatten, flat_x) > 1000
         end
     end
+
+    @testset "bounded" begin
+        @testset "$val" for val in [
+            [-0.05, 0.5], [-0.1 + 1e-12, 2.0 - 1e-11], fill(2.0 - 1e-12, 1, 2, 3)
+        ]
+            p = bounded(val, -0.1, 2.0)
+            test_parameter_interface(p)
+            @test value(p) ≈ val
+        end
+
+        @test_throws ArgumentError bounded(-0.05, 0.0, 1.0)
+
+        # Same style of performance test as for positive(::Array). See above for info.
+        @testset "zygote performance" begin
+            x = rand(1000, 1000) .* 1.98 .- 0.99
+            flat_x, unflatten = value_flatten(bounded(x, -1.0, 1.0))
+
+            # primal evaluation
+            count_allocs(unflatten, flat_x)
+            @test count_allocs(unflatten, flat_x) < 100
+
+            # forward evaluation
+            count_allocs(Zygote.pullback, unflatten, flat_x)
+            @test count_allocs(Zygote.pullback, unflatten, flat_x) < 100
+
+            # pullback
+            out, pb = Zygote.pullback(unflatten, flat_x)
+            count_allocs(pb, out)
+            @test count_allocs(pb, out) < 100
+        end
+
+        # Same style of performance test as for `map(positive, x)`. See above for info.
+        @testset "zygote performance of scalar equivalent" begin
+            x = rand(1000, 1000) .* 1.98 .- 0.99
+            flat_x, unflatten = value_flatten(map(x -> bounded(x, -1.0, 1.0), x))
+
+            # forward evaluation
+            count_allocs(Zygote.pullback, unflatten, flat_x)
+            @test count_allocs(Zygote.pullback, unflatten, flat_x) > 1000
+        end
+    end
 end
