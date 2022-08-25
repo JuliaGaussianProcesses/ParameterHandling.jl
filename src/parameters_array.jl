@@ -73,10 +73,8 @@ function bounded(val::Array{<:Real}, lower_bound::Real, upper_bound::Real)
 
     if any(val .> ub_minus_ε) || any(val .< lb_plus_ε)
         throw(
-            ArgumentError(
-                "At least one element of `val`, $val, outside of specified bounds
-                ($lower_bound, $upper_bound)."
-            ),
+            ArgumentError("At least one element of `val`, $val, outside of specified bounds
+                          ($lower_bound, $upper_bound).")
         )
     end
 
