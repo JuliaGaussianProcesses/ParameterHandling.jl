@@ -84,7 +84,7 @@
 
         # Same style of performance test as for `map(positive, x)`. See above for info.
         @testset "zygote performance of scalar equivalent" begin
-            x = rand(1000, 1000) .* 1.98 .- 0.99
+            x = rand(1000) .* 1.98 .- 0.99
             flat_x, unflatten = value_flatten(map(x -> bounded(x, -1.0, 1.0), x))
 
             # forward evaluation
