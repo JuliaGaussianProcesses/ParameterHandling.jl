@@ -61,7 +61,7 @@
             @test value(p) ≈ val
         end
 
-        @test_throws ArgumentError bounded(-0.05, 0.0, 1.0)
+        @test_throws ArgumentError bounded([-0.05], 0.0, 1.0)
 
         # Same style of performance test as for positive(::Array). See above for info.
         @testset "zygote performance" begin
