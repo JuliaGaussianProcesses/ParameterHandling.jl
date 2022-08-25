@@ -31,5 +31,16 @@
             count_allocs(pb, out)
             @test count_allocs(pb, out) < 100
         end
+
+        # Check that this optimisation is actually necessary -- i.e. that the performance
+        # of the equivalent operation, `map(positive, x)` interacts poorly with AD.
+        @testset "zygote performance of scalar equivalent" begin
+            x = rand(1000) .+ 0.1
+            flat_x, unflatten = value_flatten(map(positive, x))
+
+            # forward evaluation
+            count_allocs(Zygote.pullback, unflatten, flat_x)
+            count_allocs(Zygote.pullback, unflatten, flat_x) > 1000
+        end
     end
 end
