@@ -48,7 +48,7 @@
 
             # forward evaluation
             count_allocs(Zygote.pullback, unflatten, flat_x)
-            count_allocs(Zygote.pullback, unflatten, flat_x) > 1000
+            @test count_allocs(Zygote.pullback, unflatten, flat_x) > 1000
         end
     end
 
