@@ -186,8 +186,8 @@ package doesn't currently support the functionality that you need.
 We use a model involving a Gaussian process (GP) -- you don't need to know anything about
 Gaussian processes other than
 1. they are a class of probabilistic model which can be used for regression (amongst other things).
-2. they have some tunable free-parameters that are usually tuned using an iterative
-optimisation algorithm -- typically a variant on gradient descent.
+2. they have some tunable parameters that are usually chosen by optimising a scalar objective function using an iterative
+optimisation algorithm -- typically a variant of gradient descent.
 Ths is representative of a large number of models in ML / statistics / optimisation.
 
 This example can be copy+pasted into a REPL session.
@@ -219,7 +219,7 @@ raw_initial_params = (
 )
 
 # Using ParameterHandling.value_flatten, we can obtain both a Vector{Float64} representation of
-# these parameters, and a mapping from that vector back to the original parameter values:
+# these parameters, and a mapping from that vector back to the original (unconstrained) parameter values.
 flat_initial_params, unflatten = ParameterHandling.value_flatten(raw_initial_params)
 
 # ParameterHandling.value strips out all of the Positive types in initial_params,
