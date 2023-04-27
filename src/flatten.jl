@@ -32,9 +32,7 @@ function flatten(::Type{T}, x::R) where {T<:Real,R<:Real}
 end
 
 function flatten(::Type{T}, x::Vector{R}) where {T<:Real,R<:Real}
-    function unflatten_to_Vector(v::Vector{T})
-        return convert(Vector{R}, v)
-    end
+    unflatten_to_Vector(v::Vector{T}) = convert(Vector{R}, v)
     return Vector{T}(x), unflatten_to_Vector
 end
 
