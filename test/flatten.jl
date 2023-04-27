@@ -18,7 +18,6 @@
             test_flatten_interface(v)
             @test length(first(flatten(v))) == 0
         end
-        
         # Prevent regression of issue #60
         @testset "Type stability of unflatten" begin
             θ = (rand(10),)
