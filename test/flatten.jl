@@ -22,7 +22,7 @@
         @testset "Type stability of unflatten" begin
             θ = (rand(10),)
             x, unflatten = flatten(θ)
-            @test (@inferred unflatten(x)) == θ 
+            @test (@inferred unflatten(x)) == θ
         end
     end
 
