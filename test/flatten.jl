@@ -13,10 +13,17 @@
         test_flatten_interface(randn(5, 4))
         test_flatten_interface([randn(5) for _ in 1:3])
 
-        # Prevent regression of https://github.com/invenia/ParameterHandling.jl/issues/31
+        # Prevent regression of issue #31
         @testset for v in [[1, 2, 3], sparse([1, 0, 3])]
             test_flatten_interface(v)
             @test length(first(flatten(v))) == 0
+        end
+        
+        # Prevent regression of issue #60
+        @testset "Type stability of unflatten" begin
+            θ = (rand(10),)
+            x, unflatten = flatten(θ)
+            @test (@inferred unflatten(x)) == θ 
         end
     end
 
