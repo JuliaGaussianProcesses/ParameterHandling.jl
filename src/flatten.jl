@@ -19,7 +19,7 @@ function flatten end
 
 flatten(x) = flatten(Float64, x)
 
-function ParameterHandling.flatten(::Type{T}, ::Nothing) where {T<:Real} 
+function flatten(::Type{T}, ::Nothing) where {T<:Real} 
     v = T[]
     unflatten_to_Nothing(::Vector{T}) = nothing
     return v, unflatten_to_Nothing
