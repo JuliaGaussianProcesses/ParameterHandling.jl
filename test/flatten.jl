@@ -8,6 +8,11 @@
         end
     end
 
+    @testset "Nothing" begin
+        test_flatten_interface(nothing)
+        @test isempty(first(flatten(nothing)))
+    end
+
     @testset "AbstractArrays" begin
         test_flatten_interface(randn(10))
         test_flatten_interface(randn(5, 4))
