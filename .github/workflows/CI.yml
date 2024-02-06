@@ -18,24 +18,8 @@ jobs:
           - "1"  # Latest Release
         os:
           - ubuntu-latest
-          - macOS-latest
-          - windows-latest
-        arch:
-          - x64
-          - x86
-        exclude:
-          # Test 32-bit only on Linux
-          - os: macOS-latest
-            arch: x86
-          - os: windows-latest
-            arch: x86
-        include:
-          # Add a 1.5 job because that's what Invenia actually uses
-          - os: ubuntu-latest
-            version: 1.5
-            arch: x64
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
@@ -57,22 +41,6 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           file: lcov.info
-
-  slack:
-    name: Notify Slack Failure
-    needs: test
-    runs-on: ubuntu-latest
-    if: always() && github.event_name == 'schedule'
-    steps:
-      - uses: technote-space/workflow-conclusion-action@v2
-      - uses: voxmedia/github-action-slack-notify-build@v1
-        if: env.WORKFLOW_CONCLUSION == 'failure'
-        with:
-          channel: nightly-rse
-          status: FAILED
-          color: danger
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.RSE_SLACK_BOT_TOKEN }}
 
   docs:
     name: Documentation
