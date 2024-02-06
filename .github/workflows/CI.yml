@@ -23,7 +23,7 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          arch: x64
       - uses: actions/cache@v2
         env:
           cache-name: cache-artifacts
