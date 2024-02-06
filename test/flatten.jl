@@ -42,7 +42,7 @@
 
         # Prevent regression of PR #67
         @testset "Type stability of unflatten" begin
-            θ = (1., ((2., 3.), 4.))
+            θ = (1.0, ((2.0, 3.0), 4.0))
             x, unflatten = flatten(θ)
             @test (@inferred unflatten(x)) == θ
         end
