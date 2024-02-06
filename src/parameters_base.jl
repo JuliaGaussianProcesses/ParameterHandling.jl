@@ -18,3 +18,4 @@ value(x::AbstractArray) = map(value, x)
 value(x::Tuple) = map(value, x)
 value(x::NamedTuple) = map(value, x)
 value(x::Dict) = Dict(k => value(v) for (k, v) in x)
+value(::Nothing) = nothing

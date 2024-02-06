@@ -62,7 +62,7 @@
     end
 
     @testset "value_flatten" begin
-        x = (ones(3), fixed(5.0), (a=fixed(5.0), b=[6.0, 2.1]))
+        x = (ones(3), fixed(5.0), (a=fixed(5.0), b=[6.0, 2.1]), nothing)
         v, unflatten = value_flatten(x)
 
         @test length(v) == 5
