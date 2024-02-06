@@ -84,7 +84,7 @@ function flatten(::Type{T}, x::Tuple) where {T<:Real}
     l1 = length(vec1)
     l2 = length(vec2)
     function unflatten_to_Tuple(v::Vector{T})
-        return (back1(v[1:l1]), back2(v[l1+1:l1+l2]))
+        return (back1(v[1:l1]), back2(v[l1+1:l1+l2])...)
     end
     return vcat(vec1, vec2), unflatten_to_Tuple
 end
