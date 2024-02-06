@@ -27,7 +27,7 @@ end
 
 function flatten(::Type{T}, x::Integer) where {T<:Real}
     v = T[]
-    unflatten_to_Integer(v::Vector{T}) = x
+    unflatten_to_Integer(::Vector{T}) = x
     return v, unflatten_to_Integer
 end
 
