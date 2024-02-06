@@ -39,6 +39,13 @@
         test_flatten_interface((1.0, 2.0); check_inferred=tuple_infers)
 
         test_flatten_interface((1.0, (2.0, 3.0), randn(5)); check_inferred=tuple_infers)
+
+        # Prevent regression of PR #67
+        @testset "Type stability of unflatten" begin
+            θ = (1., ((2., 3.), 4.))
+            x, unflatten = flatten(θ)
+            @test (@inferred unflatten(x)) == θ
+        end
     end
 
     @testset "NamedTuple" begin
