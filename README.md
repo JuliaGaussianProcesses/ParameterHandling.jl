@@ -2,7 +2,7 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaGaussianProcesses.github.io/ParameterHandling.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaGaussianProcesses.github.io/ParameterHandling.jl/dev)
-[![CI](https://github.com/JuliaGaussianProcesses/ParameterHandling.jl/workflows/CI/badge.svg)](https://github.com/JuliaGaussianProcesses/ParameterHandling.jl/actions?query=workflow%3ACI)
+[![CI](https://github.com/JuliaGaussianProcesses/ParameterHandling.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/JuliaGaussianProcesses/ParameterHandling.jl/actions/workflows/CI.yml)
 [![Codecov](https://codecov.io/gh/JuliaGaussianProcesses/ParameterHandling.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaGaussianProcesses/ParameterHandling.jl)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 
