@@ -18,6 +18,8 @@ jobs:
           - "1"  # Latest Release
         os:
           - ubuntu-latest
+          - macOS-latest
+          - windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1
