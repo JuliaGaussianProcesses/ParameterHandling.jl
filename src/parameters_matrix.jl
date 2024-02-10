@@ -48,23 +48,23 @@ The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
 function positive_definite(X::AbstractMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
-    return PositiveDefinite(tril_to_vec(cholesky(X).L))
+    return PositiveSemiDefinite(tril_to_vec(cholesky(X).L))
 end
 
-struct PositiveDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
+struct PositiveSemiDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
     L::TL
 end
 
-Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L
+Base.:(==)(X::PositiveSemiDefinite, Y::PositiveSemiDefinite) = X.L == Y.L
 
 A_At(X) = X * X'
 
-value(X::PositiveDefinite) = A_At(vec_to_tril(X.L))
+value(X::PositiveSemiDefinite) = A_At(vec_to_tril(X.L))
 
-function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
+function flatten(::Type{T}, X::PositiveSemiDefinite) where {T<:Real}
     v, unflatten_v = flatten(T, X.L)
-    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(unflatten_v(v_new))
-    return v, unflatten_PositiveDefinite
+    unflatten_PositiveSemiDefinite(v_new::Vector{T}) = PositiveSemiDefinite(unflatten_v(v_new))
+    return v, unflatten_PositiveSemiDefinite
 end
 
 # Convert a vector to lower-triangular matrix
