@@ -62,7 +62,7 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         X.L .= 0 # zero the unconstrained value
         @test isposdef(value(X))
         @test_throws ArgumentError positive_definite(zeros(3, 3))
-        @test_throws ArgumentError positive_definite(X_mat, 0.)
+        @test_throws ArgumentError positive_definite(X_mat, 0.0)
         test_parameter_interface(X)
 
         x, re = flatten(X)

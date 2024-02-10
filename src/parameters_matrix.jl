@@ -68,7 +68,7 @@ be a positive real number.
 
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
-function positive_definite(X::AbstractMatrix{T}, ε = eps(T)) where T <: Real
+function positive_definite(X::AbstractMatrix{T}, ε=eps(T)) where {T<:Real}
     ε > 0 || throw(ArgumentError("ε is not positive. Use `positive_semidefinite` instead."))
     _X = X - ε * I
     isposdef(_X) || throw(ArgumentError("X-ε*I is not positive-definite for ε=$ε"))
@@ -87,11 +87,13 @@ value(X::PositiveSemiDefinite) = A_At(vec_to_tril(X.L))
 
 function flatten(::Type{T}, X::PositiveSemiDefinite) where {T<:Real}
     v, unflatten_v = flatten(T, X.L)
-    unflatten_PositiveSemiDefinite(v_new::Vector{T}) = PositiveSemiDefinite(unflatten_v(v_new))
+    function unflatten_PositiveSemiDefinite(v_new::Vector{T})
+        return PositiveSemiDefinite(unflatten_v(v_new))
+    end
     return v, unflatten_PositiveSemiDefinite
 end
 
-struct PositiveDefinite{TL<:AbstractVector{<:Real}, Tε<:Real} <: AbstractParameter
+struct PositiveDefinite{TL<:AbstractVector{<:Real},Tε<:Real} <: AbstractParameter
     L::TL
     ε::Tε
 end
