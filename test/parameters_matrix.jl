@@ -61,6 +61,8 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         @test isposdef(value(X))
         X.L .= 0 # zero the unconstrained value
         @test isposdef(value(X))
+        @test X != positive_definite(X_mat)
+        @test positive_definite(X_mat, 1e-3) != positive_definite(X_mat, 1e-2)
         @test_throws ArgumentError positive_definite(zeros(3, 3))
         @test_throws ArgumentError positive_definite(X_mat, 0.0)
         test_parameter_interface(X)

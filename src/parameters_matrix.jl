@@ -98,7 +98,7 @@ struct PositiveDefinite{TL<:AbstractVector{<:Real},Tε<:Real} <: AbstractParamet
     ε::Tε
 end
 
-Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L
+Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L && X.ε == Y.ε
 
 value(X::PositiveDefinite) = A_At(vec_to_tril(X.L)) + X.ε * I
 
