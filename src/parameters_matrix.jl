@@ -39,14 +39,20 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
 end
 
 """
-    positive_definite(X::AbstractMatrix{<:Real})
+    positive_semidefinite(X::AbstractMatrix{<:Real})
 
-Produce a parameter whose `value` is constrained to be a positive-definite matrix. The argument `X` needs to
+Produce a parameter whose `value` is constrained to be a positive-semidefinite matrix. The argument `X` needs to
 be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix).
 
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
+
+!!! warning
+    Even though the matrix needs to be positive-definite upon construction, the
+    unconstrained parameter can become zero, which represents a matrix which is merely
+    positive-semidefinite. To get a matrix that is always strictly positive-definite, use
+    `positive_definite`.
 """
-function positive_definite(X::AbstractMatrix{<:Real})
+function positive_semidefinite(X::AbstractMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
     return PositiveSemiDefinite(tril_to_vec(cholesky(X).L))
 end

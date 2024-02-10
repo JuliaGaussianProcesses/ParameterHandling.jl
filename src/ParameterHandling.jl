@@ -8,7 +8,8 @@ using LinearAlgebra
 using SparseArrays
 
 export flatten,
-    value_flatten, positive, bounded, fixed, deferred, orthogonal, positive_definite
+    value_flatten, positive, bounded, fixed, deferred, orthogonal, positive_definite,
+    positive_semidefinite
 
 include("flatten.jl")
 include("parameters_base.jl")

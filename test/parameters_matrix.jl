@@ -24,19 +24,19 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         end
     end
 
-    @testset "positive_definite" begin
+    @testset "positive_semidefinite" begin
         @testset "vec_tril_conversion" begin
             X = tril!(rand(3, 3))
             @test vec_to_tril(tril_to_vec(X)) == X
             @test_throws ErrorException tril_to_vec(rand(4, 5))
         end
         X_mat = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
-        X = positive_definite(X_mat)
+        X = positive_semidefinite(X_mat)
         @test X == X
         @test value(X) ≈ X_mat
         @test isposdef(value(X))
         @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
-        @test_throws ArgumentError positive_definite(rand(3, 3))
+        @test_throws ArgumentError positive_semidefinite(rand(3, 3))
         test_parameter_interface(X)
 
         x, re = flatten(X)
