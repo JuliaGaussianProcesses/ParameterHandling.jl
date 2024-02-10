@@ -54,4 +54,24 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         @test vec_to_tril(Δl) == tril(ΔL)
         ChainRulesTestUtils.test_rrule(vec_to_tril, x)
     end
+
+    @testset "positive_definite" begin
+        X_mat = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
+        X = positive_definite(X_mat)
+        @test isposdef(value(X))
+        X.L .= 0 # zero the unconstrained value
+        @test isposdef(value(X))
+        @test_throws ArgumentError positive_definite(zeros(3, 3))
+        @test_throws ArgumentError positive_definite(X_mat, 0.)
+        test_parameter_interface(X)
+
+        x, re = flatten(X)
+        Δl = first(
+            Zygote.gradient(x) do x
+                X = re(x)
+                return logdet(value(X))
+            end,
+        )
+        ChainRulesTestUtils.test_rrule(vec_to_tril, x)
+    end
 end

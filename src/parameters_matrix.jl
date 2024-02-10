@@ -41,8 +41,9 @@ end
 """
     positive_semidefinite(X::AbstractMatrix{<:Real})
 
-Produce a parameter whose `value` is constrained to be a positive-semidefinite matrix. The argument `X` needs to
-be a positive-definite matrix (see https://en.wikipedia.org/wiki/Definite_matrix).
+Produce a parameter whose `value` is constrained to be a positive-semidefinite matrix. The
+argument `X` needs to be a positive-definite matrix
+(see https://en.wikipedia.org/wiki/Definite_matrix).
 
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 
@@ -55,6 +56,23 @@ The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 function positive_semidefinite(X::AbstractMatrix{<:Real})
     isposdef(X) || throw(ArgumentError("X is not positive-definite"))
     return PositiveSemiDefinite(tril_to_vec(cholesky(X).L))
+end
+
+"""
+    positive_definite(X::AbstractMatrix{<:Real}, ε = eps(T))
+
+Produce a parameter whose `value` is constrained to be a strictly positive-semidefinite
+matrix. The argument `X` minus `ε` times the identity needs to be a positive-definite matrix
+(see https://en.wikipedia.org/wiki/Definite_matrix). The optional second argument `ε` must
+be a positive real number.
+
+The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
+"""
+function positive_definite(X::AbstractMatrix{T}, ε = eps(T)) where T <: Real
+    ε > 0 || throw(ArgumentError("ε is not positive. Use `positive_semidefinite` instead."))
+    _X = X - ε * I
+    isposdef(_X) || throw(ArgumentError("X-ε*I is not positive-definite for ε=$ε"))
+    return PositiveDefinite(tril_to_vec(cholesky(_X).L), ε)
 end
 
 struct PositiveSemiDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
@@ -71,6 +89,21 @@ function flatten(::Type{T}, X::PositiveSemiDefinite) where {T<:Real}
     v, unflatten_v = flatten(T, X.L)
     unflatten_PositiveSemiDefinite(v_new::Vector{T}) = PositiveSemiDefinite(unflatten_v(v_new))
     return v, unflatten_PositiveSemiDefinite
+end
+
+struct PositiveDefinite{TL<:AbstractVector{<:Real}, Tε<:Real} <: AbstractParameter
+    L::TL
+    ε::Tε
+end
+
+Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L
+
+value(X::PositiveDefinite) = A_At(vec_to_tril(X.L)) + X.ε * I
+
+function flatten(::Type{T}, X::PositiveDefinite) where {T<:Real}
+    v, unflatten_v = flatten(T, X.L)
+    unflatten_PositiveDefinite(v_new::Vector{T}) = PositiveDefinite(unflatten_v(v_new), X.ε)
+    return v, unflatten_PositiveDefinite
 end
 
 # Convert a vector to lower-triangular matrix
