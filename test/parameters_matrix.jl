@@ -37,7 +37,7 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
 
         # Zeroing the unconstrained value preserve positivity
-        X.L .= 0 
+        X.L .= 0
         @test isposdef(value(X))
 
         # Check that zeroing the unconstrained value does not affect the original array
