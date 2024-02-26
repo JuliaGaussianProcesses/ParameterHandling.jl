@@ -32,11 +32,21 @@ using ParameterHandling: vec_to_tril, tril_to_vec
         end
         X_mat = ParameterHandling.A_At(rand(3, 3)) # Create a positive definite object
         X = positive_definite(X_mat)
-        @test X == X
         @test value(X) ≈ X_mat
         @test isposdef(value(X))
         @test vec_to_tril(X.L) ≈ cholesky(X_mat).L
-        @test_throws ArgumentError positive_definite(rand(3, 3))
+
+        # Zeroing the unconstrained value preserve positivity
+        X.L .= 0
+        @test isposdef(value(X))
+
+        # Check that zeroing the unconstrained value does not affect the original array
+        @test X != positive_definite(X_mat)
+
+        @test positive_definite(X_mat, 1e-5) != positive_definite(X_mat, 1e-6)
+        @test_throws ArgumentError positive_definite(zeros(3, 3))
+        @test_throws ArgumentError positive_definite(X_mat, 0.0)
+
         test_parameter_interface(X)
 
         x, re = flatten(X)
@@ -46,12 +56,6 @@ using ParameterHandling: vec_to_tril, tril_to_vec
                 return logdet(value(X))
             end,
         )
-        ΔL = first(
-            Zygote.gradient(vec_to_tril(X.L)) do L
-                return logdet(L * L')
-            end,
-        )
-        @test vec_to_tril(Δl) == tril(ΔL)
         ChainRulesTestUtils.test_rrule(vec_to_tril, x)
     end
 end
