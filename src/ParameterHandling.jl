@@ -14,8 +14,7 @@ export flatten,
     fixed,
     deferred,
     orthogonal,
-    positive_definite,
-    positive_semidefinite
+    positive_definite
 
 include("flatten.jl")
 include("parameters_base.jl")

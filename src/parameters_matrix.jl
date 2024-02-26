@@ -39,29 +39,9 @@ function flatten(::Type{T}, X::Orthogonal) where {T<:Real}
 end
 
 """
-    positive_semidefinite(X::AbstractMatrix{<:Real})
-
-Produce a parameter whose `value` is constrained to be a positive-semidefinite matrix. The
-argument `X` needs to be a positive-definite matrix
-(see https://en.wikipedia.org/wiki/Definite_matrix).
-
-The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
-
-!!! warning
-    Even though the matrix needs to be positive-definite upon construction, the
-    unconstrained parameter can become zero, which represents a matrix which is merely
-    positive-semidefinite. To get a matrix that is always strictly positive-definite, use
-    `positive_definite`.
-"""
-function positive_semidefinite(X::AbstractMatrix{<:Real})
-    isposdef(X) || throw(ArgumentError("X is not positive-definite"))
-    return PositiveSemiDefinite(tril_to_vec(cholesky(X).L))
-end
-
-"""
     positive_definite(X::AbstractMatrix{<:Real}, ε = eps(T))
 
-Produce a parameter whose `value` is constrained to be a strictly positive-semidefinite
+Produce a parameter whose `value` is constrained to be a strictly positive-definite
 matrix. The argument `X` minus `ε` times the identity needs to be a positive-definite matrix
 (see https://en.wikipedia.org/wiki/Definite_matrix). The optional second argument `ε` must
 be a positive real number.
@@ -69,34 +49,18 @@ be a positive real number.
 The unconstrained parameter is a `LowerTriangular` matrix, stored as a vector.
 """
 function positive_definite(X::AbstractMatrix{T}, ε=eps(T)) where {T<:Real}
-    ε > 0 || throw(ArgumentError("ε is not positive. Use `positive_semidefinite` instead."))
+    ε > 0 || throw(ArgumentError("ε must be positive."))
     _X = X - ε * I
     isposdef(_X) || throw(ArgumentError("X-ε*I is not positive-definite for ε=$ε"))
     return PositiveDefinite(tril_to_vec(cholesky(_X).L), ε)
-end
-
-struct PositiveSemiDefinite{TL<:AbstractVector{<:Real}} <: AbstractParameter
-    L::TL
-end
-
-Base.:(==)(X::PositiveSemiDefinite, Y::PositiveSemiDefinite) = X.L == Y.L
-
-A_At(X) = X * X'
-
-value(X::PositiveSemiDefinite) = A_At(vec_to_tril(X.L))
-
-function flatten(::Type{T}, X::PositiveSemiDefinite) where {T<:Real}
-    v, unflatten_v = flatten(T, X.L)
-    function unflatten_PositiveSemiDefinite(v_new::Vector{T})
-        return PositiveSemiDefinite(unflatten_v(v_new))
-    end
-    return v, unflatten_PositiveSemiDefinite
 end
 
 struct PositiveDefinite{TL<:AbstractVector{<:Real},Tε<:Real} <: AbstractParameter
     L::TL
     ε::Tε
 end
+
+A_At(X) = X * X'
 
 Base.:(==)(X::PositiveDefinite, Y::PositiveDefinite) = X.L == Y.L && X.ε == Y.ε
 
